@@ -1,0 +1,69 @@
+{
+    "entries": [
+        {
+            "content": {
+                "filters": [
+                    {
+                        "content": {
+                            "checks": [
+                                "mathworks.misra.AutosarReceiverInterface"
+                            ],
+                            "filteredItem": {
+                                "content": {
+                                    "ID": "mathworks.misra.AutosarReceiverInterface"
+                                },
+                                "type": "advisor.filter.BlockFilter",
+                                "uuid": "79ef1ffe-4c5c-43d3-9b75-6624456f7b49"
+                            },
+                            "metadata": {
+                                "content": {
+                                    "summary": "Intentional AUTOSAR Justification Report",
+                                    "timeStamp": "2025-09-17T21:37:58",
+                                    "user": "Sameer"
+                                },
+                                "type": "advisor.filter.Metadata",
+                                "uuid": "c40e64dc-13cc-4d15-af98-2b861b138644"
+                            }
+                        },
+                        "type": "advisor.filter.AdvisorFilterSpecification",
+                        "uuid": "78a6d2ac-836b-4a00-8204-74cca5032688"
+                    },
+                    {
+                        "content": {
+                            "checks": [
+                                "mathworks.misra.CompareFloatEquality"
+                            ],
+                            "filteredItem": {
+                                "content": {
+                                    "ID": "mathworks.misra.CompareFloatEquality"
+                                },
+                                "type": "advisor.filter.BlockFilter",
+                                "uuid": "2f8ad644-f951-46a0-bce1-22c3e7d96ab1"
+                            },
+                            "metadata": {
+                                "content": {
+                                    "summary": "Rechecked expected boolean values to confirm floating point precision is not a concern.",
+                                    "timeStamp": "2025-09-17T21:38:26",
+                                    "user": "Sameer"
+                                },
+                                "type": "advisor.filter.Metadata",
+                                "uuid": "06c963b8-c64f-4bd6-90e9-926d21d0e75b"
+                            }
+                        },
+                        "type": "advisor.filter.AdvisorFilterSpecification",
+                        "uuid": "9455aa22-634c-451e-af7f-41e6b065e591"
+                    }
+                ],
+                "modelName": "BMS_Software"
+            },
+            "type": "advisor.filter.AdvisorFilterManager",
+            "uuid": "18811746-8774-4ce8-b168-8bdf28b64af4"
+        }
+    ],
+    "packageUris": [
+        "http://schema.mathworks.com/mf0/advisor_filter/R2020b",
+        "http://schema.mathworks.com/mf0/advisor_filter_sl/R2021a",
+        "http://schema.mathworks.com/mf0/advisor_filter_base/R2021a"
+    ],
+    "version": "1.0"
+}

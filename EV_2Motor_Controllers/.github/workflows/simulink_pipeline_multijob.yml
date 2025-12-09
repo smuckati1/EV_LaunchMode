@@ -1,0 +1,1044 @@
+name:
+  MBD Pipeline
+
+on:
+  # workflow_dispatch:
+  # Triggers the workflow on push events but only for the main branch
+  push:
+    branches: 
+      - main
+      - Feature
+      
+permissions:
+  checks:
+    write
+
+  contents:
+    read
+
+
+env:
+  PATH_TO_MATLAB:
+    /opt/matlab/R2025b
+
+
+jobs:
+  Restore_Cache:
+    runs-on:
+      ubuntu-latest
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v4
+
+      - name:
+          Restore Cache
+
+        uses:
+          actions/cache@v4
+
+        with:
+          key:
+            padv_artifacts-${{ github.run_id }}-${{ github.run_attempt }}
+
+          restore-keys:
+            padv_artifacts-cache
+
+          path:
+            |
+            GeneratedArtifacts/CodeGen
+            PA_Results/BMS_Software/model_comparison
+            PA_Results/BMS_Software/model_standards_results
+            PA_Results/BMS_Software/webview
+            PA_Results/EV_ControlSystem_Architecture/model_comparison
+            PA_Results/EV_ControlSystem_Architecture/webview
+            PA_Results/EV_VehicleLevel_Architecture/model_comparison
+            PA_Results/EV_VehicleLevel_Architecture/webview
+            PA_Results/VCU_Software/model_comparison
+            PA_Results/VCU_Software/model_standards_results
+            PA_Results/VCU_Software/webview
+            PA_Results/test_results
+            derived/artifacts.dmr
+
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v4
+
+        with:
+          name:
+            01_Restore_Cache_padv_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            GeneratedArtifacts/CodeGen
+            PA_Results/BMS_Software/model_comparison
+            PA_Results/BMS_Software/model_standards_results
+            PA_Results/BMS_Software/webview
+            PA_Results/EV_ControlSystem_Architecture/model_comparison
+            PA_Results/EV_ControlSystem_Architecture/webview
+            PA_Results/EV_VehicleLevel_Architecture/model_comparison
+            PA_Results/EV_VehicleLevel_Architecture/webview
+            PA_Results/VCU_Software/model_comparison
+            PA_Results/VCU_Software/model_standards_results
+            PA_Results/VCU_Software/webview
+            PA_Results/test_results
+
+          retention-days:
+            90
+
+
+
+
+  Generate_Webview:
+    if:
+      ${{ !cancelled() }}
+
+    needs:
+      MISRA_C_2012_Checks
+
+    runs-on:
+      ubuntu-latest
+    environment: myMATLABenv
+    env:
+      MLM_LICENSE_TOKEN: ${{ secrets.MLM_LICENSE_TOKEN }} # Uses environment secret
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v4
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            01_Restore_Cache_padv_artifacts
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            02_Runprocess_ModelChecks_padv_artifacts
+
+
+      - name:
+          Setup MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          products: >
+            Parallel_Computing_Toolbox
+            Simulink
+            Stateflow
+            MATLAB_Test
+            Simulink_Test
+            Simulink_Coverage
+            Simulink_Check
+            CI/CD_Automation_for_Simulink_Check
+            MATLAB_Coder
+            Simulink_Coder
+            Embedded_Coder
+            Simscape
+            Simscape_Electrical
+            Simscape_Battery
+            MATLAB_Compiler
+            Simulink_Compiler
+            Simulink_Report_Generator
+            MATLAB_Report_Generator
+            AUTOSAR_Blockset
+            Powertrain_Blockset
+          cache: true
+          release: R2025b  
+
+      - name: 
+          Start Display Server
+        
+        run: |
+         sudo apt-get install -y xvfb
+         Xvfb :99 &
+         export DISPLAY=:99
+         echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name:
+          Generate Webviews for Models
+
+        # run:
+        #  >
+        #  matlab-batch 
+        #  -nodesktop 
+        #  -logfile output.log "openProject(pwd);runprocess(Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = false);" 
+        uses: matlab-actions/run-command@v2
+        with:
+          # command: openProject(pwd);runprocess(Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);
+          command: openProject(pwd);runprocess(Process = 'CIPipeline', Tasks = "padv.builtin.task.GenerateSimulinkWebView", Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = false);
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v4
+
+        with:
+          name:
+            03_Runprocess_GenWebView_padv_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            GeneratedArtifacts/CodeGen
+            PA_Results/BMS_Software/model_comparison
+            PA_Results/BMS_Software/model_standards_results
+            PA_Results/BMS_Software/webview
+            PA_Results/EV_ControlSystem_Architecture/model_comparison
+            PA_Results/EV_ControlSystem_Architecture/webview
+            PA_Results/EV_VehicleLevel_Architecture/model_comparison
+            PA_Results/EV_VehicleLevel_Architecture/webview
+            PA_Results/VCU_Software/model_comparison
+            PA_Results/VCU_Software/model_standards_results
+            PA_Results/VCU_Software/webview
+            PA_Results/test_results
+
+          retention-days:
+            90
+
+
+  MISRA_C_2012_Checks:
+    if:
+      ${{ !cancelled() }}
+
+    needs:
+      Restore_Cache
+
+    runs-on:
+      ubuntu-latest
+    environment: myMATLABenv
+    env:
+      MLM_LICENSE_TOKEN: ${{ secrets.MLM_LICENSE_TOKEN }} # Uses environment secret
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v4
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            01_Restore_Cache_padv_artifacts
+
+      - name:
+          Setup MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          products: >
+            Parallel_Computing_Toolbox
+            Simulink
+            Stateflow
+            MATLAB_Test
+            Simulink_Test
+            Simulink_Coverage
+            Simulink_Check
+            CI/CD_Automation_for_Simulink_Check
+            MATLAB_Coder
+            Simulink_Coder
+            Embedded_Coder
+            Simscape
+            Simscape_Electrical
+            Simscape_Battery
+            MATLAB_Compiler
+            Simulink_Compiler
+            Simulink_Report_Generator
+            MATLAB_Report_Generator
+            AUTOSAR_Blockset
+            Powertrain_Blockset
+          cache: true
+          release: R2025b  
+
+      - name: 
+          Start Display Server
+        
+        run: |
+         sudo apt-get install -y xvfb
+         Xvfb :99 &
+         export DISPLAY=:99
+         echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name:
+          Evaluate MISRA C:2012 MdlAdvisor Checks
+
+        # run:
+        #  >
+        #  matlab-batch 
+        #  -nodesktop 
+        #  -logfile output.log "openProject(pwd);runprocess(Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = false);" 
+        uses: matlab-actions/run-command@v2
+        with:
+          # command: openProject(pwd);runprocess(Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);
+          command: openProject(pwd);runprocess(Process = 'CIPipeline', Tasks = "padv.builtin.task.RunModelStandards", Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = false);
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v4
+
+        with:
+          name:
+            02_Runprocess_ModelChecks_padv_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            GeneratedArtifacts/CodeGen
+            PA_Results/BMS_Software/model_comparison
+            PA_Results/BMS_Software/model_standards_results
+            PA_Results/BMS_Software/webview
+            PA_Results/EV_ControlSystem_Architecture/model_comparison
+            PA_Results/EV_ControlSystem_Architecture/webview
+            PA_Results/EV_VehicleLevel_Architecture/model_comparison
+            PA_Results/EV_VehicleLevel_Architecture/webview
+            PA_Results/VCU_Software/model_comparison
+            PA_Results/VCU_Software/model_standards_results
+            PA_Results/VCU_Software/webview
+            PA_Results/test_results
+
+          retention-days:
+            90
+
+  Model_Compare_Reports:
+    if:
+      ${{ !cancelled() }}
+
+    needs:
+      MISRA_C_2012_Checks
+
+    runs-on:
+      ubuntu-latest
+    environment: myMATLABenv
+    env:
+      MLM_LICENSE_TOKEN: ${{ secrets.MLM_LICENSE_TOKEN }} # Uses environment secret
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v4
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            01_Restore_Cache_padv_artifacts
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            02_Runprocess_ModelChecks_padv_artifacts
+
+      - name:
+          Setup MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          products: >
+            Parallel_Computing_Toolbox
+            Simulink
+            Stateflow
+            MATLAB_Test
+            Simulink_Test
+            Simulink_Coverage
+            Simulink_Check
+            CI/CD_Automation_for_Simulink_Check
+            MATLAB_Coder
+            Simulink_Coder
+            Embedded_Coder
+            Simscape
+            Simscape_Electrical
+            Simscape_Battery
+            MATLAB_Compiler
+            Simulink_Compiler
+            Simulink_Report_Generator
+            MATLAB_Report_Generator
+            AUTOSAR_Blockset
+            Powertrain_Blockset
+          cache: true
+          release: R2025b  
+
+      - name: 
+          Start Display Server
+        
+        run: |
+         sudo apt-get install -y xvfb
+         Xvfb :99 &
+         export DISPLAY=:99
+         echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name:
+          Create Model Compare Reports
+
+        # run:
+        #  >
+        #  matlab-batch 
+        #  -nodesktop 
+        #  -logfile output.log "openProject(pwd);runprocess(Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = false);" 
+        uses: matlab-actions/run-command@v2
+        with:
+          # command: openProject(pwd);runprocess(Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);
+          command: openProject(pwd);runprocess(Process = 'CIPipeline', Tasks = "padv.builtin.task.GenerateModelComparison", Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = false);
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v4
+
+        with:
+          name:
+            04_Runprocess_CompareReports_padv_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            GeneratedArtifacts/CodeGen
+            PA_Results/BMS_Software/model_comparison
+            PA_Results/BMS_Software/model_standards_results
+            PA_Results/BMS_Software/webview
+            PA_Results/EV_ControlSystem_Architecture/model_comparison
+            PA_Results/EV_ControlSystem_Architecture/webview
+            PA_Results/EV_VehicleLevel_Architecture/model_comparison
+            PA_Results/EV_VehicleLevel_Architecture/webview
+            PA_Results/VCU_Software/model_comparison
+            PA_Results/VCU_Software/model_standards_results
+            PA_Results/VCU_Software/webview
+            PA_Results/test_results
+
+          retention-days:
+            90
+
+  MiL_Sil_Tests:
+    if:
+      ${{ !cancelled() }}
+
+    needs:
+      MISRA_C_2012_Checks
+
+    runs-on:
+      ubuntu-latest
+    environment: myMATLABenv
+    env:
+      MLM_LICENSE_TOKEN: ${{ secrets.MLM_LICENSE_TOKEN }} # Uses environment secret
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v4
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            01_Restore_Cache_padv_artifacts
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            02_Runprocess_ModelChecks_padv_artifacts
+
+      - name:
+          Setup MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          products: >
+            Parallel_Computing_Toolbox
+            Simulink
+            Stateflow
+            MATLAB_Test
+            Simulink_Test
+            Simulink_Coverage
+            Simulink_Check
+            CI/CD_Automation_for_Simulink_Check
+            MATLAB_Coder
+            Simulink_Coder
+            Embedded_Coder
+            Simscape
+            Simscape_Electrical
+            Simscape_Battery
+            MATLAB_Compiler
+            Simulink_Compiler
+            Simulink_Report_Generator
+            MATLAB_Report_Generator
+            AUTOSAR_Blockset
+            Powertrain_Blockset
+          cache: true
+          release: R2025b  
+
+      - name: 
+          Start Display Server
+        
+        run: |
+         sudo apt-get install -y xvfb
+         Xvfb :99 &
+         export DISPLAY=:99
+         echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name:
+          Removed Share Utillities before any SiL Tests
+        uses: matlab-actions/run-command@v2
+        with:
+          command: openProject(pwd); scrubSharedUtils;
+         
+      - name:
+          Execute MiL and SiL Tests
+
+        # run:
+        #  >
+        #  matlab-batch 
+        #  -nodesktop 
+        #  -logfile output.log "openProject(pwd);runprocess(Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = false);" 
+        uses: matlab-actions/run-command@v2
+        with:
+          # command: openProject(pwd);runprocess(Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);
+          command: openProject(pwd);runprocess(Process = 'CIPipeline', Tasks = ["padv.builtin.task.RunTestsPerTestCase","padv.builtin.task.MergeTestResults"], Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = false);
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v4
+
+        with:
+          name:
+            05_Runprocess_TestnCoverageReports_padv_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            GeneratedArtifacts/CodeGen
+            PA_Results/BMS_Software/model_comparison
+            PA_Results/BMS_Software/model_standards_results
+            PA_Results/BMS_Software/webview
+            PA_Results/EV_ControlSystem_Architecture/model_comparison
+            PA_Results/EV_ControlSystem_Architecture/webview
+            PA_Results/EV_VehicleLevel_Architecture/model_comparison
+            PA_Results/EV_VehicleLevel_Architecture/webview
+            PA_Results/VCU_Software/model_comparison
+            PA_Results/VCU_Software/model_standards_results
+            PA_Results/VCU_Software/webview
+            PA_Results/test_results
+
+          retention-days:
+            90
+
+  Generate_Embedded_C_Code:
+    if:
+      ${{ !cancelled() }}
+
+    needs:
+      MiL_Sil_Tests
+
+    runs-on:
+      ubuntu-latest
+    environment: myMATLABenv
+    env:
+      MLM_LICENSE_TOKEN: ${{ secrets.MLM_LICENSE_TOKEN }} # Uses environment secret
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v4
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            01_Restore_Cache_padv_artifacts
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            02_Runprocess_ModelChecks_padv_artifacts
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            05_Runprocess_TestnCoverageReports_padv_artifacts
+
+      - name:
+          Setup MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          products: >
+            Parallel_Computing_Toolbox
+            Simulink
+            Stateflow
+            MATLAB_Test
+            Simulink_Test
+            Simulink_Coverage
+            Simulink_Check
+            CI/CD_Automation_for_Simulink_Check
+            MATLAB_Coder
+            Simulink_Coder
+            Embedded_Coder
+            Simscape
+            Simscape_Electrical
+            Simscape_Battery
+            MATLAB_Compiler
+            Simulink_Compiler
+            Simulink_Report_Generator
+            MATLAB_Report_Generator
+            AUTOSAR_Blockset
+            Powertrain_Blockset
+          cache: true
+          release: R2025b  
+
+      - name: 
+          Start Display Server
+        
+        run: |
+         sudo apt-get install -y xvfb
+         Xvfb :99 &
+         export DISPLAY=:99
+         echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      #- name:
+      #    Removed Share Utillities before Code Generation
+      #  uses: matlab-actions/run-command@v2
+      #  with:
+      #    command: openProject(pwd); scrubSharedUtils;
+
+
+      - name:
+          Generate C Code for Models
+
+        # run:
+        #  >
+        #  matlab-batch 
+        #  -nodesktop 
+        #  -logfile output.log "openProject(pwd);runprocess(Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = false);" 
+        uses: matlab-actions/run-command@v2
+        with:
+          # command: openProject(pwd);runprocess(Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);
+          command: openProject(pwd);runprocess(Process = 'CIPipeline', Tasks = "padv.builtin.task.GenerateCode", Force = true, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = false);
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v4
+
+        with:
+          name:
+            06_Runprocess_GeneratedCode_padv_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            GeneratedArtifacts/CodeGen
+            PA_Results/BMS_Software/model_comparison
+            PA_Results/BMS_Software/model_standards_results
+            PA_Results/BMS_Software/webview
+            PA_Results/EV_ControlSystem_Architecture/model_comparison
+            PA_Results/EV_ControlSystem_Architecture/webview
+            PA_Results/EV_VehicleLevel_Architecture/model_comparison
+            PA_Results/EV_VehicleLevel_Architecture/webview
+            PA_Results/VCU_Software/model_comparison
+            PA_Results/VCU_Software/model_standards_results
+            PA_Results/VCU_Software/webview
+            PA_Results/test_results
+
+          retention-days:
+            90
+
+  Generate_PADV_Report:
+    if:
+      ${{ !cancelled() }}
+
+    needs:
+      Generate_Embedded_C_Code
+
+    runs-on:
+      ubuntu-latest
+    environment: myMATLABenv
+    env:
+      MLM_LICENSE_TOKEN: ${{ secrets.MLM_LICENSE_TOKEN }}  # Uses environment secret
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v4
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            01_Restore_Cache_padv_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            03_Runprocess_GenWebView_padv_artifacts
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            02_Runprocess_ModelChecks_padv_artifacts
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            04_Runprocess_CompareReports_padv_artifacts
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            05_Runprocess_TestnCoverageReports_padv_artifacts
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            06_Runprocess_GeneratedCode_padv_artifacts
+
+      - name:
+          Setup MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          products: >
+            Parallel_Computing_Toolbox
+            Simulink
+            Stateflow
+            MATLAB_Test
+            Simulink_Test
+            Simulink_Coverage
+            Simulink_Check
+            CI/CD_Automation_for_Simulink_Check
+            MATLAB_Coder
+            Simulink_Coder
+            Embedded_Coder
+            Simscape
+            Simscape_Electrical
+            Simscape_Battery
+            MATLAB_Compiler
+            Simulink_Compiler
+            Simulink_Report_Generator
+            MATLAB_Report_Generator
+            AUTOSAR_Blockset
+            Powertrain_Blockset
+          cache: true
+          release: R2025b  
+
+      - name: 
+          Start Display Server
+        
+        run: |
+         sudo apt-get install -y xvfb
+         Xvfb :99 &
+         export DISPLAY=:99
+         echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name:
+          Generate PADV Report
+          
+        # run:
+          # >
+          # matlab-batch 
+          # -nodesktop 
+          # -logfile output.log "openProject(pwd);
+          # rptObj=padv.ProcessAdvisorReportGenerator(Process = 'CIPipeline', Format='pdf', OutputPath=fullfile(currentProject().RootFolder,'ProcessAdvisorReport'));
+          # rptObj.generateReport();" 
+        uses: matlab-actions/run-command@v2
+        with:
+          command: openProject(pwd);rptObj=padv.ProcessAdvisorReportGenerator(Process = 'CIPipeline', Format='pdf', OutputPath=fullfile(currentProject().RootFolder,'ProcessAdvisorReport'));rptObj.generateReport();
+
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v4
+
+        with:
+          name:
+            07_Generate_PADV_Report_padv_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            ProcessAdvisorReport.pdf
+
+          retention-days:
+            90
+
+
+
+  Collect_Artifacts:
+    if:
+      ${{ !cancelled() }}
+
+    needs:
+      Generate_PADV_Report
+
+    runs-on:
+      ubuntu-latest
+
+    steps:
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            01_Restore_Cache_padv_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            03_Runprocess_GenWebView_padv_artifacts
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            02_Runprocess_ModelChecks_padv_artifacts
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            04_Runprocess_CompareReports_padv_artifacts
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            05_Runprocess_TestnCoverageReports_padv_artifacts
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            06_Runprocess_GeneratedCode_padv_artifacts
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v4
+
+        with:
+          name:
+            07_Generate_PADV_Report_padv_artifacts
+
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v4
+
+        with:
+          name:
+            FINAL_Collect_Artifacts_padv_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            GeneratedArtifacts/CodeGen
+            PA_Results/BMS_Software/model_comparison
+            PA_Results/BMS_Software/model_standards_results
+            PA_Results/BMS_Software/webview
+            PA_Results/EV_ControlSystem_Architecture/model_comparison
+            PA_Results/EV_ControlSystem_Architecture/webview
+            PA_Results/EV_VehicleLevel_Architecture/model_comparison
+            PA_Results/EV_VehicleLevel_Architecture/webview
+            PA_Results/VCU_Software/model_comparison
+            PA_Results/VCU_Software/model_standards_results
+            PA_Results/VCU_Software/webview
+            PA_Results/test_results
+
+          retention-days:
+            90
+
+
+      - name:
+          Save Cache
+
+        uses:
+          actions/cache@v4
+
+        with:
+          key:
+            padv_artifacts-cache-${{ github.sha }}
+
+          path:
+            |
+            GeneratedArtifacts/CodeGen
+            PA_Results/BMS_Software/model_comparison
+            PA_Results/BMS_Software/model_standards_results
+            PA_Results/BMS_Software/webview
+            PA_Results/EV_ControlSystem_Architecture/model_comparison
+            PA_Results/EV_ControlSystem_Architecture/webview
+            PA_Results/EV_VehicleLevel_Architecture/model_comparison
+            PA_Results/EV_VehicleLevel_Architecture/webview
+            PA_Results/VCU_Software/model_comparison
+            PA_Results/VCU_Software/model_standards_results
+            PA_Results/VCU_Software/webview
+            PA_Results/test_results
+            derived/artifacts.dmr
+
+
+
+
+

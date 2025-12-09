@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HarnessInformation>
+  <Harness>
+    <P Name="Name">EV_ControlSystem_Architecture_Harness1</P>
+    <P Name="Description"/>
+    <P Name="CreatedBy">smuckati</P>
+    <P Name="CreatedOn">Wed Oct 04 21:34:26 2023</P>
+    <P Name="ModifiedBy">smuckati</P>
+    <P Name="LastSaved">Tue Sep 23 19:44:08 2025</P>
+    <P Name="Owner">bd</P>
+    <P Name="OwnerType">BD_HARNESS</P>
+    <P Name="OwnerPath">.</P>
+    <P Name="Directory"/>
+    <P Name="FileName">EV_ControlSystem_Architecture_Harness1.slx</P>
+    <P Name="SavedVersion">25.2</P>
+    <P Name="HarnessUUID">ac701d56-8139-40fd-9f80-0ab95fa507b8</P>
+    <P Name="HarnessConnectionsMap">0,1,2,3,4,5,6,7,8,9|0,1|0,0,0,0||</P>
+    <P Name="VerificationMode">0</P>
+    <P Name="HarnessOwnerCheckSum">0,0,0,0</P>
+    <P Name="RebuildOnOpen">false</P>
+    <P Name="RebuildModelData">false</P>
+    <P Name="Graphical">false</P>
+    <P Name="DriveFcnCallWithTS">true</P>
+    <P Name="ScheduleInitTermReset">false</P>
+    <P Name="AutoShapeInputs">false</P>
+    <P Name="SLDVCompatible">no</P>
+    <P Name="SynchronizationMode">1</P>
+    <P Name="IsImported">false</P>
+    <P Name="PostRebuildCB"/>
+    <P Name="IsCodeContext">false</P>
+    <P Name="SchedulerBlock">0</P>
+    <P Name="SourceTypeString">Inport</P>
+    <P Name="SinkTypeString">Outport</P>
+    <P Name="CustomSourcePath"/>
+    <P Name="CustomSinkPath"/>
+    <P Name="BlockSIDs">93|125|0|0|0|0|0</P>
+    <P Name="OpenGraphs"/>
+    <P Name="ExistingBuildFolder"/>
+    <P Name="FunctionInterfaceName"/>
+    <P Name="SysArchSUTModel"/>
+  </Harness>
+  <ModelMetadata>
+    <P Name="ModelUUID">e10eefd7-baa4-4a45-86c2-cc8261313dc4</P>
+    <P Name="OwnerBDName">EV_ControlSystem_Architecture</P>
+  </ModelMetadata>
+</HarnessInformation>
