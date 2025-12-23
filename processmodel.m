@@ -161,6 +161,25 @@ function processmodel(pm)
         codegenTask.UpdateThisModelReferenceTarget = 'IfOutOfDate';
     end
 
+
+
+%% Unzip Pack-N-Go and run Polyspace using packaged options (via MATLAB Build Tool)
+% Runs after code generation
+if includeGenerateCodeTask
+    polyspaceBTTask = pm.addTask( ...
+        padv.builtin.task.RunBuildTool( ...
+            Name="UnzipAndAnalyzePolyspace", ...
+            Title="Unzip Pack-N-Go and Run Polyspace (options-file)", ...
+            IterationQuery=findCodeGenModels, ...
+            Tasks="polyspacePackNGoAnalyze", ...   % target defined in buildfile.m
+            CleanTask="" ...                       % optional clean target in buildfile.m
+        ) ...
+    );
+
+    % Enforce run order: right after codegenTask
+    polyspaceBTTask.runsAfter(codegenTask);
+
+
     %% Check coding standards
     % Tools required: Polyspace Bug Finder
     if includeGenerateCodeTask && includeAnalyzeModelCode
