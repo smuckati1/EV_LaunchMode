@@ -1,16 +1,24 @@
-
-% buildfile.m
 function plan = buildfile
-% Define a MATLAB Build Tool plan with a target that unzips Pack-N-Go and runs Polyspace.
 
+% Define a MATLAB Build Tool plan with a target that unzips Pack-N-Go and runs Polyspace.
 import matlab.buildtool.*;
-plan = Plan;
+%plan = Plan;
+
+plan = buildplan(localfunctions);
+
+% Make the "polyspacePackNGoAnalyze" task the default task in the plan
+plan.DefaultTasks = "polyspacePackNGoAnalyze";
+end
+
+function polyspacePackNGoAnalyzeTask(~)
+% Define the task for the Polyspace Pack-N-Go analysis
 
 % Parameters (adjust to your project)
-zipName   = "genCodeArchive.zip";                 % Code archive name produced by codegen + packNGo
+codeGenFile = Simulink.fileGenControl('get', 'CodeGenFolder');
+zipName   = fullfile(codeGenFile, 'VCU_Software.zip');                 % Code archive name produced by codegen + packNGo
 resultsDir= fullfile("PA_Results","polyspace_results"); % Where to store Polyspace results
-polyspaceBin = "";                                % If needed, set Polyspace bin dir (e.g., Windows path)
+polyspaceBin = "";
+%runPSStuff(zipName)
+runPolyspacePackNGo(zipName, resultsDir, polyspaceBin);
 
-plan("polyspacePackNGoAnalyze") = task( ...
-    Dependencies=[], ...
-    Actions=@() runPolyspacePackNGo(zipName, resultsDir, polyspaceBin));
+end

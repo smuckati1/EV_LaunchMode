@@ -24,6 +24,7 @@ function processmodel(pm)
     includeProveCodeQuality = false && (~isempty(ver('pscodeprover')) || ~isempty(ver('pscodeproverserver')));
     includeCodeInspection = false;
     includeGenerateRequirementsReport = false;
+    runBuildtoolSteps = false;
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% Define Shared Path Variables
@@ -161,23 +162,31 @@ function processmodel(pm)
         codegenTask.UpdateThisModelReferenceTarget = 'IfOutOfDate';
     end
 
+    %% Package and Zip Up Code
+    % Tools required: Embedded Coder
+    % Zip up the Generated code and other essential artifacts for polyspace
+    if includeGenerateCodeTask
+        psZipUpCodeTask = pm.addTask(...
+            "Zip Up Artifacts for Polyspace",...
+            Action = @psZipUp, ...
+            IterationQuery = findCodeGenModels);
+    end
 
 
-%% Unzip Pack-N-Go and run Polyspace using packaged options (via MATLAB Build Tool)
-% Runs after code generation
-if includeGenerateCodeTask
-    polyspaceBTTask = pm.addTask( ...
-        padv.builtin.task.RunBuildTool( ...
-            Name="UnzipAndAnalyzePolyspace", ...
-            Title="Unzip Pack-N-Go and Run Polyspace (options-file)", ...
-            IterationQuery=findCodeGenModels, ...
-            Tasks="polyspacePackNGoAnalyze", ...   % target defined in buildfile.m
-            CleanTask="" ...                       % optional clean target in buildfile.m
-        ) ...
-    );
 
-    % Enforce run order: right after codegenTask
-    polyspaceBTTask.runsAfter(codegenTask);
+    %% Unzip Pack-N-Go and run Polyspace using packaged options (via MATLAB Build Tool)
+    % Runs after code generation
+    if includeGenerateCodeTask && runBuildtoolSteps
+        polyspaceBTTask = pm.addTask( ...
+            padv.builtin.task.RunBuildTool( ...
+                Name="UnzipAndAnalyzePolyspace", ...
+                Title="Unzip Pack-N-Go and Run Polyspace (options-file)", ...
+                IterationQuery=findCodeGenModels, ...
+                Tasks="polyspacePackNGoAnalyze", ...   % target defined in buildfile.m
+                CleanTask="" ...                       % optional clean target in buildfile.m
+            ) ...
+        );
+    end
 
 
     %% Check coding standards
@@ -263,6 +272,13 @@ if includeGenerateCodeTask
     if includeSDDTask && includeModelStandardsTask
         sddTask.runsAfter(maTask);
     end
+    if includeGenerateCodeTask
+        psZipUpCodeTask.runsAfter(codegenTask);
+    end
+    if includeGenerateCodeTask && runBuildtoolSteps
+        % Enforce run order: right after codegenTask
+        polyspaceBTTask.runsAfter(psZipUpCodeTask);
+    end
     if includeGenerateCodeTask && includeAnalyzeModelCode && includeProveCodeQuality
         pscpTask.runsAfter(psbfTask);
     end
@@ -301,4 +317,37 @@ if includeGenerateCodeTask
         pasltest.addProcess(pm);
     end
 
+end
+
+% Define action that custom task performs
+function taskResult = psZipUp(~)
+
+    taskResult = padv.TaskResult;
+
+    % Configure Polyspace PackNGo options for the model
+    mdlName = 'VCU_Software';
+    load_system(mdlName);
+
+    % Generaete the code, in case it has not been generated (bug in oct 25
+    % release for AUTOSAR models with modelRefs)
+    slbuild(mdlName);
+
+    % Setup the polyspace options
+    % Use BugFinder verification mode to focus on bug detection
+    psOpt = pslinkoptions(mdlName);
+    psOpt.ResultDir = fullfile('results_$ModelName$');
+    psOpt.InputRangeMode = 'FullRange';
+    psOpt.ParamRangeMode = 'DesignMinMax';
+    psOpt.VerificationMode = 'BugFinder';
+
+    % Generate polyspace options
+    zipFile = polyspacePackNGo(mdlName,psOpt);
+    close_system(mdlName);
+
+    disp('HAHAHAHAHAHA')
+    codeGenFile = Simulink.fileGenControl('get', 'CodeGenFolder');
+    
+    % Mark the parent task as passed
+    taskResult.Status = padv.TaskStatus.Pass;
+    taskResult.Values.Pass = 1;
 end
