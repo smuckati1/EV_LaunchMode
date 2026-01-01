@@ -1,6 +1,6 @@
 classdef GenCodeandPackIt < padv.Task
-% Generate and package options files to run Polyspace analysis on code 
-% generated from Simulink model.
+    % Generate and package options files to run Polyspace analysis on code
+    % generated from Simulink model.
 
     methods
 
@@ -32,7 +32,7 @@ classdef GenCodeandPackIt < padv.Task
             obj.OutputDirectory = options.OutputDirectory;
         end
 
-        function taskResult = run(~, input)
+        function taskResult = run(obj, input)
 
             % Generate TaskResult object to save results
             taskResult = padv.TaskResult;
@@ -42,11 +42,8 @@ classdef GenCodeandPackIt < padv.Task
             mdlName     = string(erase(modelArtifact.Alias, ".slx"));
             load_system(mdlName);
 
-            % Ensure codegen settings are setup to create a ZIP file
-            % chkZipEnabled = obj.ensurePackagingEnabled(mdlName);
-
-            % Assumes codegen settings are setup to create a ZIP file
-            chkZipEnabled = true;
+            % Check if the parameter "PackageGeneratedCodeAndArtifacts" is set to "on" in the active configuration
+            chkZipEnabled = obj.isPackagingEnabled(mdlName);
 
             if chkZipEnabled
 
@@ -55,7 +52,7 @@ classdef GenCodeandPackIt < padv.Task
                 % polyspacePackNgo function to work properly
                 % (Also, bug in oct 25 release pAdv for for AUTOSAR models with modelRefs)
                 slbuild(mdlName);
-    
+
                 % Setup the polyspace options
                 % Use BugFinder verification mode to focus on bug detection
                 psOpt = pslinkoptions(mdlName);
@@ -63,80 +60,56 @@ classdef GenCodeandPackIt < padv.Task
                 psOpt.InputRangeMode = 'FullRange';
                 psOpt.ParamRangeMode = 'DesignMinMax';
                 psOpt.VerificationMode = 'BugFinder';
-            
+
                 % Generate polyspace options
                 zipFile = polyspacePackNGo(mdlName,psOpt);
-    
+
                 % close model without saving
                 close_system(mdlName, 0);
-    
+
                 % Update Process Advisor Status and Show Results
                 if ~isempty(zipFile)
                     taskResult.Status      = padv.TaskStatus.Pass;
                     taskResult.OutputPaths = string(zipFile);
+                    taskResult.Values.Pass = 1;
                 else
                     taskResult.Status = padv.TaskStatus.Fail;
+                    taskResult.Values.Fail = 1;
                 end
-            
-            
+
+
             else
                 taskResult.Status = padv.TaskStatus.Fail;
                 error('Task not possible; please update the configuration to enable packaging of artifacts.');
-           
+
             end
-                
+
         end
 
     end
 
-    % methods(Access=private)
-    % 
-    %     function chkZipEnabled = ensurePackagingEnabled(mdl)
-    %     % ENSUREPACKAGINGENABLED Verifies PackageGeneratedCodeAndArtifacts is 'on'
-    %     % on the active configuration (handles both local ConfigSet and ConfigSetRef).
-    %     %
-    %     % Usage:
-    %     %   ensurePackagingEnabled('myModel')
-    % 
-    % 
-    %         % --- Normalize input to a model name string that Simulink accepts ---
-    %             if isa(mdl, 'string')
-    %                 mdlName = char(mdl);            % convert MATLAB string -> char
-    %             elseif ischar(mdl)
-    %                 mdlName = mdl;                  % already char
-    %             elseif ishghandle(mdl) || ishandle(mdl)
-    %                 mdlName = get_param(mdl, 'Name'); % model/block diagram handle
-    %             else
-    %                 error('Invalid model identifier. Pass a model name (string/char) or handle.');
-    %             end
-    % 
-    %             % Ensure the model is loaded
-    %             if ~bdIsLoaded(mdlName)
-    %                 load_system(mdlName);
-    %             end
-    % 
-    % 
-    %         % Get the active configuration (could be ConfigSet or ConfigSetRef)
-    %         csActive = getActiveConfigSet(mdlName);
-    % 
-    %         % Resolve reference to the actual Simulink.ConfigSet if needed
-    %         if isa(csActive, 'Simulink.ConfigSetRef')
-    %             csReal = getRefConfigSet(csActive);
-    %         else
-    %             csReal = csActive;
-    %         end
-    % 
-    %         % Read the parameter value
-    %         val = get_param(csReal, 'PackageGeneratedCodeAndArtifacts');
-    % 
-    %         % Normalize to logical "isOn"
-    %         if ischar(val) && strcmpi(val, 'on')
-    %             chkZipEnabled = true;
-    %         else
-    %             chkZipEnabled = false;
-    %         end
-    %     end
-    % 
-    % end
-   
+
+    methods (Access = private)
+        function chkZipEnabled = isPackagingEnabled(~,mdlName)
+            %ISPACKAGINGENABLED Returns true if the active configuration enables packaging.
+            %
+            % This checks the active configuration set (or ref configset)
+            % and returns true if the parameter 'PackageGeneratedCodeAndArtifacts' is 'on'.
+
+            % Get active config set (resolve references if needed)
+            csActive = getActiveConfigSet(mdlName);
+            if isa(csActive, 'Simulink.ConfigSetRef')
+                csReal = getRefConfigSet(csActive);
+            else
+                csReal = csActive;
+            end
+
+            % Read parameter confirm its seto to 'on'
+            val = get_param(csReal, 'PackageGeneratedCodeAndArtifacts');
+            chkZipEnabled = ischar(val) && strcmpi(val, 'on');
+
+        end
+
+    end
+
 end
