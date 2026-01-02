@@ -12,6 +12,8 @@ ADOoptions = setupAzureOptions(matlabVersion);
 genPipeline = padv.pipeline.generatePipeline(ADOoptions);
 disp(genPipeline.GeneratedPipelineFiles)
 
+
+
 function options = setupAzureOptions(matlabVersion)
     options = padv.pipeline.AzureDevOpsOptions(GeneratorVersion=1);
     
@@ -113,6 +115,7 @@ function options = setupGitLabOptions(matlabVersion)
     
     options.GeneratedYMLFileName = "simulink_pipeline_GitLab-ci";
 end
+
 
 function pAdvoptions = setRunProcessOptns()
 pAdvoptions = padv.pipeline.RunProcessOptions();
