@@ -1,10 +1,58 @@
+clear
+clc
 matlabVersion = "R2025b";
 
-GHoptions = setupGitHubOptions(matlabVersion);
-generatorResults = padv.pipeline.generatePipeline(GHoptions);
+% GHoptions = setupGitHubOptions(matlabVersion);
+% genPipeline = padv.pipeline.generatePipeline(GHoptions);
+% disp(genPipeline.GeneratedPipelineFiles)
+% 
+% GLoptions = setupGitLabOptions(matlabVersion);
+% genPipeline = padv.pipeline.generatePipeline(GLoptions);
+% disp(genPipeline.GeneratedPipelineFiles)
 
-GLoptions = setupGitLabOptions(matlabVersion);
-generatorResults = padv.pipeline.generatePipeline(GLoptions);
+ADOoptions = setupAzureOptions(matlabVersion);
+genPipeline = padv.pipeline.generatePipeline(ADOoptions);
+disp(genPipeline.GeneratedPipelineFiles)
+
+function options = setupAzureOptions(matlabVersion)
+    options = padv.pipeline.AzureDevOpsOptions(GeneratorVersion=1);
+    
+    options.MatlabInstallationLocation = strcat("/opt/matlab/", matlabVersion);
+    options.ShellEnvironment = "bash";
+    options.UseMatlabPlugin = true;
+    
+    % Wont be used but still specify in case you deice to change the runner to
+    % self-hosted
+    options.MatlabLaunchCmd = strcat ("matlab-batch");
+    options.AddBatchStartupOption = false;
+    
+    options.StopOnStageFailure = true;
+    options.PipelineArchitecture = padv.pipeline.Architecture.SerialStagesGroupPerTask;
+    options.EnablePipelineCaching = true;
+    
+    pAdvoptions = padv.pipeline.RunProcessOptions();
+    pAdvoptions.DryRun = false;
+    pAdvoptions.EnableTaskLogging = true;
+    pAdvoptions.Force = false;
+    pAdvoptions.RunWithoutSaving = false;
+    pAdvoptions.GenerateJUnitForProcess = true;
+    pAdvoptions.GenerateReport = false;
+    
+    options.RunprocessCommandOptions = pAdvoptions;
+    
+    
+    options.EnableArtifactCollection = "always";
+    options.ArtifactZipFileName = "mbd_pipeline_artifacts";
+    
+    options.GenerateReport = true;
+    options.ReportFormat = "pdf";
+    
+    % Consider Enabling this in future!
+    options.EnableOpenTelemetry = false;
+    
+    options.GeneratedYMLFileName = "simulink_pipeline_AzureDevOps";
+end
+
 
 function options = setupGitHubOptions(matlabVersion)
     options = padv.pipeline.GitHubOptions(GeneratorVersion=1);
@@ -47,6 +95,7 @@ function options = setupGitHubOptions(matlabVersion)
     
     options.GeneratedYMLFileName = "simulink_pipeline_GitHubActions";
 end
+
 
 function options = setupGitLabOptions(matlabVersion)
     options = padv.pipeline.GitLabOptions(GeneratorVersion=1);
