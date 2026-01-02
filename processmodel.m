@@ -254,11 +254,11 @@ function processmodel(pm)
     if includeMergeTestResultsTask && includeModelTestingMetricTask
         mtMetricTask.runsAfter(mergeTestTask);
     end
-    if includeSimulinkWebViewTask && includeModelMaintainabilityMetricTask
-        slwebTask.runsAfter(mmMetricTask);
-    end
     if includeModelStandardsTask && includeModelMaintainabilityMetricTask
         maTask.runsAfter(mmMetricTask);
+    end
+    if includeSimulinkWebViewTask && includeModelStandardsTask
+        slwebTask.runsAfter(maTask);
     end
     % if includeModelStandardsTask && includeSimulinkWebViewTask
     %     maTask.runsAfter(slwebTask);
@@ -319,36 +319,3 @@ function processmodel(pm)
     end
 
 end
-
-% Define action that custom task performs
-% function taskResult = psZipUp(~)
-% 
-%     taskResult = padv.TaskResult;
-% 
-%     % Configure Polyspace PackNGo options for the model
-%     mdlName = 'VCU_Software';
-%     load_system(mdlName);
-% 
-%     % Generaete the code, in case it has not been generated (bug in oct 25
-%     % release for AUTOSAR models with modelRefs)
-%     slbuild(mdlName);
-% 
-%     % Setup the polyspace options
-%     % Use BugFinder verification mode to focus on bug detection
-%     psOpt = pslinkoptions(mdlName);
-%     psOpt.ResultDir = fullfile('results_$ModelName$');
-%     psOpt.InputRangeMode = 'FullRange';
-%     psOpt.ParamRangeMode = 'DesignMinMax';
-%     psOpt.VerificationMode = 'BugFinder';
-% 
-%     % Generate polyspace options
-%     zipFile = polyspacePackNGo(mdlName,psOpt);
-%     close_system(mdlName);
-% 
-%     disp('HAHAHAHAHAHA')
-%     codeGenFile = Simulink.fileGenControl('get', 'CodeGenFolder');
-% 
-%     % Mark the parent task as passed
-%     taskResult.Status = padv.TaskStatus.Pass;
-%     taskResult.Values.Pass = 1;
-% end

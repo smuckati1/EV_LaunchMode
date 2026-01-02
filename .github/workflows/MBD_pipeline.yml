@@ -1,0 +1,1369 @@
+name:
+  MBD_pipeline
+
+on:
+  # workflow_dispatch:
+  # Triggers the workflow on push events but only for the main branch
+  push:
+    branches: 
+      - main
+      - bDevelopment
+
+permissions:
+  checks:
+    write
+
+  contents:
+    read
+
+
+env:
+  PATH_TO_MATLAB:
+    /opt/matlab/R2025b
+
+
+jobs:
+  Restore_Cache:
+    runs-on:
+      ubuntu-latest
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v6.0.1
+
+      - name:
+          Restore Cache
+
+        uses:
+          actions/cache@v5.0.1
+
+        with:
+          key:
+            mbd_pipeline_artifacts-${{ github.run_id }}-${{ github.run_attempt }}
+
+          restore-keys:
+            mbd_pipeline_artifacts-cache
+
+          path:
+            |
+            GeneratedArtifacts/CodeGen
+            PA_Results/BMS_Software/model_comparison
+            PA_Results/BMS_Software/model_standards_results
+            PA_Results/BMS_Software/webview
+            PA_Results/EV_ControlSystem_Architecture/model_comparison
+            PA_Results/EV_ControlSystem_Architecture/webview
+            PA_Results/EV_VehicleLevel_Architecture/model_comparison
+            PA_Results/EV_VehicleLevel_Architecture/webview
+            PA_Results/VCU_Software/model_comparison
+            PA_Results/VCU_Software/model_standards_results
+            PA_Results/VCU_Software/webview
+            PA_Results/test_results
+            derived/artifacts.dmr
+
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v6.0.0
+
+        with:
+          name:
+            Restore_Cache_mbd_pipeline_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            GeneratedArtifacts/CodeGen
+            PA_Results/BMS_Software/model_comparison
+            PA_Results/BMS_Software/model_standards_results
+            PA_Results/BMS_Software/webview
+            PA_Results/EV_ControlSystem_Architecture/model_comparison
+            PA_Results/EV_ControlSystem_Architecture/webview
+            PA_Results/EV_VehicleLevel_Architecture/model_comparison
+            PA_Results/EV_VehicleLevel_Architecture/webview
+            PA_Results/VCU_Software/model_comparison
+            PA_Results/VCU_Software/model_standards_results
+            PA_Results/VCU_Software/webview
+            PA_Results/test_results
+
+          retention-days:
+            90
+
+
+
+
+  Check_Modeling_Standards:
+    if:
+      ${{ !cancelled() }}
+      
+    needs:
+      Restore_Cache
+
+    runs-on:
+      ubuntu-latest
+    environment: myMATLABenv
+    env:
+      MLM_LICENSE_TOKEN: ${{ secrets.MLM_LICENSE_TOKEN }} # Uses environment secret
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v6.0.1
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Restore_Cache_mbd_pipeline_artifacts
+
+
+      - name:
+          Setup MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          products: >
+            Parallel_Computing_Toolbox
+            Simulink
+            Stateflow
+            MATLAB_Test
+            Simulink_Test
+            Simulink_Coverage
+            Simulink_Check
+            CI/CD_Automation_for_Simulink_Check
+            MATLAB_Coder
+            Simulink_Coder
+            Embedded_Coder
+            Simscape
+            Simscape_Electrical
+            Simscape_Battery
+            MATLAB_Compiler
+            Simulink_Compiler
+            Simulink_Report_Generator
+            MATLAB_Report_Generator
+            AUTOSAR_Blockset
+            Powertrain_Blockset
+          cache: true
+          release: R2025b  
+
+      - name: 
+          Start Display Server
+        
+        run: |
+         sudo apt-get install -y xvfb
+         Xvfb :99 &
+         export DISPLAY=:99
+         echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name:
+          Run Process Advisor via MATLAB
+
+        # run:
+        #  >
+        #  matlab-batch 
+        #  -nodesktop 
+        #  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.RunModelStandards|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.RunModelStandards|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);" 
+
+        uses: matlab-actions/run-command@v2
+        with:
+          command: openProject(pwd);runprocess(Tasks = {'padv.builtin.task.RunModelStandards|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.RunModelStandards|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v6.0.0
+
+        with:
+          name:
+            Check_Modeling_Standards_mbd_pipeline_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            PA_Results/BMS_Software/model_standards_results
+            PA_Results/VCU_Software/model_standards_results
+
+          retention-days:
+            90
+
+
+
+
+  Generate_Model_Comparison:
+    if:
+      ${{ !cancelled() }}
+
+    needs:
+      Check_Modeling_Standards
+
+    runs-on:
+      ubuntu-latest
+    environment: myMATLABenv
+    env:
+      MLM_LICENSE_TOKEN: ${{ secrets.MLM_LICENSE_TOKEN }} # Uses environment secret
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v6.0.1
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Restore_Cache_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Check_Modeling_Standards_mbd_pipeline_artifacts
+
+
+      - name:
+          Setup MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          products: >
+            Parallel_Computing_Toolbox
+            Simulink
+            Stateflow
+            MATLAB_Test
+            Simulink_Test
+            Simulink_Coverage
+            Simulink_Check
+            CI/CD_Automation_for_Simulink_Check
+            MATLAB_Coder
+            Simulink_Coder
+            Embedded_Coder
+            Simscape
+            Simscape_Electrical
+            Simscape_Battery
+            MATLAB_Compiler
+            Simulink_Compiler
+            Simulink_Report_Generator
+            MATLAB_Report_Generator
+            AUTOSAR_Blockset
+            Powertrain_Blockset
+          cache: true
+          release: R2025b  
+
+      - name: 
+          Start Display Server
+        
+        run: |
+         sudo apt-get install -y xvfb
+         Xvfb :99 &
+         export DISPLAY=:99
+         echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name:
+          Run Process Advisor via MATLAB
+
+        #run:
+        #  >
+        #  matlab-batch 
+        #  -nodesktop 
+        #  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateModelComparison|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.GenerateModelComparison|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'padv.builtin.task.GenerateModelComparison|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateModelComparison|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);" 
+
+        uses: matlab-actions/run-command@v2
+        with:
+          command: openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateModelComparison|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.GenerateModelComparison|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'padv.builtin.task.GenerateModelComparison|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateModelComparison|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v6.0.0
+
+        with:
+          name:
+            Generate_Model_Comparison_mbd_pipeline_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            PA_Results/BMS_Software/model_comparison
+            PA_Results/EV_ControlSystem_Architecture/model_comparison
+            PA_Results/EV_VehicleLevel_Architecture/model_comparison
+            PA_Results/VCU_Software/model_comparison
+
+          retention-days:
+            90
+
+
+
+
+  Generate_Simulink_Web_View:
+    if:
+      ${{ !cancelled() }}
+
+    needs:
+      Check_Modeling_Standards
+
+    runs-on:
+      ubuntu-latest
+    environment: myMATLABenv
+    env:
+      MLM_LICENSE_TOKEN: ${{ secrets.MLM_LICENSE_TOKEN }} # Uses environment secret
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v6.0.1
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Restore_Cache_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Check_Modeling_Standards_mbd_pipeline_artifacts
+
+
+      - name:
+          Setup MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          products: >
+            Parallel_Computing_Toolbox
+            Simulink
+            Stateflow
+            MATLAB_Test
+            Simulink_Test
+            Simulink_Coverage
+            Simulink_Check
+            CI/CD_Automation_for_Simulink_Check
+            MATLAB_Coder
+            Simulink_Coder
+            Embedded_Coder
+            Simscape
+            Simscape_Electrical
+            Simscape_Battery
+            MATLAB_Compiler
+            Simulink_Compiler
+            Simulink_Report_Generator
+            MATLAB_Report_Generator
+            AUTOSAR_Blockset
+            Powertrain_Blockset
+          cache: true
+          release: R2025b  
+
+      - name: 
+          Start Display Server
+        
+        run: |
+         sudo apt-get install -y xvfb
+         Xvfb :99 &
+         export DISPLAY=:99
+         echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name:
+          Run Process Advisor via MATLAB
+
+        #run:
+        #  >
+        #  matlab-batch 
+        #  -nodesktop 
+        #  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateSimulinkWebView|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.GenerateSimulinkWebView|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'padv.builtin.task.GenerateSimulinkWebView|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateSimulinkWebView|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);" 
+
+        uses: matlab-actions/run-command@v2
+        with:
+          command: openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateSimulinkWebView|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.GenerateSimulinkWebView|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'padv.builtin.task.GenerateSimulinkWebView|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateSimulinkWebView|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v6.0.0
+
+        with:
+          name:
+            Generate_Simulink_Web_View_mbd_pipeline_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            PA_Results/BMS_Software/webview
+            PA_Results/EV_ControlSystem_Architecture/webview
+            PA_Results/EV_VehicleLevel_Architecture/webview
+            PA_Results/VCU_Software/webview
+
+          retention-days:
+            90
+
+
+
+
+  Run_Tests:
+    if:
+      ${{ !cancelled() }}
+
+    needs:
+      Check_Modeling_Standards
+
+    runs-on:
+      ubuntu-latest
+    environment: myMATLABenv
+    env:
+      MLM_LICENSE_TOKEN: ${{ secrets.MLM_LICENSE_TOKEN }} # Uses environment secret
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v6.0.1
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Restore_Cache_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Check_Modeling_Standards_mbd_pipeline_artifacts
+
+
+      - name:
+          Setup MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          products: >
+            Parallel_Computing_Toolbox
+            Simulink
+            Stateflow
+            MATLAB_Test
+            Simulink_Test
+            Simulink_Coverage
+            Simulink_Check
+            CI/CD_Automation_for_Simulink_Check
+            MATLAB_Coder
+            Simulink_Coder
+            Embedded_Coder
+            Simscape
+            Simscape_Electrical
+            Simscape_Battery
+            MATLAB_Compiler
+            Simulink_Compiler
+            Simulink_Report_Generator
+            MATLAB_Report_Generator
+            AUTOSAR_Blockset
+            Powertrain_Blockset
+          cache: true
+          release: R2025b  
+
+      - name: 
+          Start Display Server
+        
+        run: |
+         sudo apt-get install -y xvfb
+         Xvfb :99 &
+         export DISPLAY=:99
+         echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name:
+          Run Process Advisor via MATLAB
+        #run:
+        #  >
+        #  matlab-batch 
+        #  -nodesktop 
+        #  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|dff27def-6d54-4ff8-bcaf-6d1fe25a276a', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|9eeeced6-977a-442c-9d77-df718a53e97f', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|3ed23bc5-c287-46ee-872e-df5ca44abe30', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|2ea864db-50a7-43ca-a6f7-0647d3596974', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|02_BMS_Models/Tests/BMS_Tests.mldatx|0ffa4996-3c2a-4bd7-a907-a79ff7b1d9b5', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|02_BMS_Models/Tests/BMS_Tests.mldatx|aaed3b09-41f6-47b6-94a1-573856817bf7', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|02_BMS_Models/Tests/BMS_Tests_SiL.mldatx|ee9e6137-7eb6-48e3-a130-81fa3c4a56fd', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|03_VCU_Models/Tests/EV2M_VCU_MiLtests.mldatx|95fe9086-5072-4cc8-827c-df4d86199177', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|03_VCU_Models/Tests/EV2M_VCU_MiLtests.mldatx|d6155623-6ac8-49c4-afb7-2f47a71d59cc'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);" 
+        
+        uses: matlab-actions/run-command@v2
+        with:
+          command: openProject(pwd);runprocess(Tasks = {'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|dff27def-6d54-4ff8-bcaf-6d1fe25a276a', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|9eeeced6-977a-442c-9d77-df718a53e97f', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|3ed23bc5-c287-46ee-872e-df5ca44abe30', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|2ea864db-50a7-43ca-a6f7-0647d3596974', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|02_BMS_Models/Tests/BMS_Tests.mldatx|0ffa4996-3c2a-4bd7-a907-a79ff7b1d9b5', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|02_BMS_Models/Tests/BMS_Tests.mldatx|aaed3b09-41f6-47b6-94a1-573856817bf7', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|02_BMS_Models/Tests/BMS_Tests_SiL.mldatx|ee9e6137-7eb6-48e3-a130-81fa3c4a56fd', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|03_VCU_Models/Tests/EV2M_VCU_MiLtests.mldatx|95fe9086-5072-4cc8-827c-df4d86199177', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|03_VCU_Models/Tests/EV2M_VCU_MiLtests.mldatx|d6155623-6ac8-49c4-afb7-2f47a71d59cc'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v6.0.0
+
+        with:
+          name:
+            Run_Tests_mbd_pipeline_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            PA_Results/test_results
+
+          retention-days:
+            90
+
+
+
+
+  Merge_Test_Results:
+    if:
+      ${{ !cancelled() }}
+
+    needs:
+      Run_Tests
+
+    runs-on:
+      ubuntu-latest
+    environment: myMATLABenv
+    env:
+      MLM_LICENSE_TOKEN: ${{ secrets.MLM_LICENSE_TOKEN }} # Uses environment secret
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v6.0.1
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Restore_Cache_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Check_Modeling_Standards_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Run_Tests_mbd_pipeline_artifacts
+
+
+      - name:
+          Setup MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          products: >
+            Parallel_Computing_Toolbox
+            Simulink
+            Stateflow
+            MATLAB_Test
+            Simulink_Test
+            Simulink_Coverage
+            Simulink_Check
+            CI/CD_Automation_for_Simulink_Check
+            MATLAB_Coder
+            Simulink_Coder
+            Embedded_Coder
+            Simscape
+            Simscape_Electrical
+            Simscape_Battery
+            MATLAB_Compiler
+            Simulink_Compiler
+            Simulink_Report_Generator
+            MATLAB_Report_Generator
+            AUTOSAR_Blockset
+            Powertrain_Blockset
+          cache: true
+          release: R2025b  
+
+      - name: 
+          Start Display Server
+        
+        run: |
+         sudo apt-get install -y xvfb
+         Xvfb :99 &
+         export DISPLAY=:99
+         echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name:
+          Run Process Advisor via MATLAB
+
+        #run:
+        #  >
+        #  matlab-batch 
+        #  -nodesktop 
+        #  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.MergeTestResults|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.MergeTestResults|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.MergeTestResults|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);" 
+
+        uses: matlab-actions/run-command@v2
+        with:
+          command: openProject(pwd);runprocess(Tasks = {'padv.builtin.task.MergeTestResults|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.MergeTestResults|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.MergeTestResults|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v4
+
+        with:
+          name:
+            Merge_Test_Results_mbd_pipeline_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            PA_Results/test_results
+
+          retention-days:
+            90
+
+
+
+
+  Generate_Code:
+    if:
+      ${{ !cancelled() }}
+
+    needs:
+      Merge_Test_Results
+
+    runs-on:
+      ubuntu-latest
+    environment: myMATLABenv
+    env:
+      MLM_LICENSE_TOKEN: ${{ secrets.MLM_LICENSE_TOKEN }} # Uses environment secret
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v6.0.1
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Restore_Cache_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Check_Modeling_Standards_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Run_Tests_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Merge_Test_Results_mbd_pipeline_artifacts
+
+
+      - name:
+          Setup MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          products: >
+            Parallel_Computing_Toolbox
+            Simulink
+            Stateflow
+            MATLAB_Test
+            Simulink_Test
+            Simulink_Coverage
+            Simulink_Check
+            CI/CD_Automation_for_Simulink_Check
+            MATLAB_Coder
+            Simulink_Coder
+            Embedded_Coder
+            Simscape
+            Simscape_Electrical
+            Simscape_Battery
+            MATLAB_Compiler
+            Simulink_Compiler
+            Simulink_Report_Generator
+            MATLAB_Report_Generator
+            AUTOSAR_Blockset
+            Powertrain_Blockset
+          cache: true
+          release: R2025b  
+
+      - name: 
+          Start Display Server
+        
+        run: |
+         sudo apt-get install -y xvfb
+         Xvfb :99 &
+         export DISPLAY=:99
+         echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name:
+          Run Process Advisor via MATLAB
+
+        #run:
+        #  >
+        #  matlab-batch 
+        #  -nodesktop 
+        #  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateCode|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateCode|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);" 
+
+        uses: matlab-actions/run-command@v2
+        with:
+          command: openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateCode|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateCode|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v4
+
+        with:
+          name:
+            Generate_Code_mbd_pipeline_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            GeneratedArtifacts/CodeGen
+
+          retention-days:
+            90
+
+
+
+
+  Zip_Up_Generated_Code_and_Details:
+    if:
+      ${{ !cancelled() }}
+
+    needs:
+      Generate_Code
+
+    runs-on:
+      ubuntu-latest
+    environment: myMATLABenv
+    env:
+      MLM_LICENSE_TOKEN: ${{ secrets.MLM_LICENSE_TOKEN }} # Uses environment secret
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v6.0.1
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Restore_Cache_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Check_Modeling_Standards_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Run_Tests_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Merge_Test_Results_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Generate_Code_mbd_pipeline_artifacts
+
+
+      - name:
+          Setup MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          products: >
+            Parallel_Computing_Toolbox
+            Simulink
+            Stateflow
+            MATLAB_Test
+            Simulink_Test
+            Simulink_Coverage
+            Simulink_Check
+            CI/CD_Automation_for_Simulink_Check
+            MATLAB_Coder
+            Simulink_Coder
+            Embedded_Coder
+            Simscape
+            Simscape_Electrical
+            Simscape_Battery
+            MATLAB_Compiler
+            Simulink_Compiler
+            Simulink_Report_Generator
+            MATLAB_Report_Generator
+            AUTOSAR_Blockset
+            Powertrain_Blockset
+          cache: true
+          release: R2025b  
+
+      - name: 
+          Start Display Server
+        
+        run: |
+         sudo apt-get install -y xvfb
+         Xvfb :99 &
+         export DISPLAY=:99
+         echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name:
+          Run Process Advisor via MATLAB
+
+        #run:
+        #  >
+        #  matlab-batch 
+        #  -nodesktop 
+        #  -logfile output.log "openProject(pwd);runprocess(Tasks = {'processLibrary.Task.GenCodeandPackIt|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'processLibrary.Task.GenCodeandPackIt|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);" 
+
+        uses: matlab-actions/run-command@v2
+        with:
+          command: openProject(pwd);runprocess(Tasks = {'processLibrary.Task.GenCodeandPackIt|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'processLibrary.Task.GenCodeandPackIt|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = false, RerunErroredTasks = false, GenerateJUnitForProcess = true);
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v4
+
+        with:
+          name:
+            Zip_Up_Generated_Code_and_Details_mbd_pipeline_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            GeneratedArtifacts/CodeGen
+
+          retention-days:
+            90
+
+
+
+
+  Generate_PADV_Report:
+    if:
+      ${{ !cancelled() }}
+
+    needs:
+      - Zip_Up_Generated_Code_and_Details
+      - Generate_Model_Comparison
+      - Generate_Simulink_Web_View
+
+    runs-on:
+      ubuntu-latest
+    environment: myMATLABenv
+    env:
+      MLM_LICENSE_TOKEN: ${{ secrets.MLM_LICENSE_TOKEN }} # Uses environment secret
+
+    steps:
+      - name:
+          Checkout Repository
+
+        uses:
+          actions/checkout@v6.0.1
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Restore_Cache_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Check_Modeling_Standards_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Generate_Model_Comparison_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Generate_Simulink_Web_View_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Run_Tests_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Merge_Test_Results_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Generate_Code_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Zip_Up_Generated_Code_and_Details_mbd_pipeline_artifacts
+
+
+      - name:
+          Setup MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          products: >
+            Parallel_Computing_Toolbox
+            Simulink
+            Stateflow
+            MATLAB_Test
+            Simulink_Test
+            Simulink_Coverage
+            Simulink_Check
+            CI/CD_Automation_for_Simulink_Check
+            MATLAB_Coder
+            Simulink_Coder
+            Embedded_Coder
+            Simscape
+            Simscape_Electrical
+            Simscape_Battery
+            MATLAB_Compiler
+            Simulink_Compiler
+            Simulink_Report_Generator
+            MATLAB_Report_Generator
+            AUTOSAR_Blockset
+            Powertrain_Blockset
+          cache: true
+          release: R2025b  
+
+      - name: 
+          Start Display Server
+        
+        run: |
+         sudo apt-get install -y xvfb
+         Xvfb :99 &
+         export DISPLAY=:99
+         echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name:
+          Generate PADV Report
+
+        #run:
+        #  >
+        #  matlab-batch 
+        #  -nodesktop 
+        #  -logfile output.log "openProject(pwd);
+        #  rptObj=padv.ProcessAdvisorReportGenerator(Process = 'CIPipeline', Format='pdf', OutputPath=fullfile(currentProject().RootFolder,'ProcessAdvisorReport'));
+        #  rptObj.generateReport();" 
+        
+        uses: matlab-actions/run-command@v2
+        with:
+          command: openProject(pwd); rptObj=padv.ProcessAdvisorReportGenerator(Process = 'CIPipeline', Format='pdf', OutputPath=fullfile(currentProject().RootFolder,'ProcessAdvisorReport')); rptObj.generateReport();
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v4
+
+        with:
+          name:
+            Generate_PADV_Report_mbd_pipeline_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            ProcessAdvisorReport.pdf
+
+          retention-days:
+            90
+
+
+
+
+  Collect_Artifacts:
+    if:
+      ${{ !cancelled() }}
+
+    needs:
+      Generate_PADV_Report
+
+    runs-on:
+      ubuntu-latest
+
+    steps:
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Restore_Cache_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Check_Modeling_Standards_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Generate_Model_Comparison_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Generate_Simulink_Web_View_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Run_Tests_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Merge_Test_Results_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Generate_Code_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Zip_Up_Generated_Code_and_Details_mbd_pipeline_artifacts
+
+
+      - name:
+          Download Artifacts
+        continue-on-error: true
+
+        uses:
+          actions/download-artifact@v7.0.0
+
+        with:
+          name:
+            Generate_PADV_Report_mbd_pipeline_artifacts
+
+
+      - name:
+          Upload Artifacts
+
+        if:
+          ${{ !cancelled() }}
+
+        uses:
+          actions/upload-artifact@v6.0.0
+
+        with:
+          name:
+            FINAL_Consolidated_mbd_pipeline_artifacts
+
+          path:
+            |
+            derived/artifacts.dmr
+            GeneratedArtifacts/CodeGen
+            PA_Results/BMS_Software/model_comparison
+            PA_Results/BMS_Software/model_standards_results
+            PA_Results/BMS_Software/webview
+            PA_Results/EV_ControlSystem_Architecture/model_comparison
+            PA_Results/EV_ControlSystem_Architecture/webview
+            PA_Results/EV_VehicleLevel_Architecture/model_comparison
+            PA_Results/EV_VehicleLevel_Architecture/webview
+            PA_Results/VCU_Software/model_comparison
+            PA_Results/VCU_Software/model_standards_results
+            PA_Results/VCU_Software/webview
+            PA_Results/test_results
+
+          retention-days:
+            90
+
+
+      - name:
+          Save Cache
+
+        uses:
+          actions/@v5.0.1
+
+        with:
+          key:
+            mbd_pipeline_artifacts-cache-${{ github.sha }}
+
+          path:
+            |
+            GeneratedArtifacts/CodeGen
+            PA_Results/BMS_Software/model_comparison
+            PA_Results/BMS_Software/model_standards_results
+            PA_Results/BMS_Software/webview
+            PA_Results/EV_ControlSystem_Architecture/model_comparison
+            PA_Results/EV_ControlSystem_Architecture/webview
+            PA_Results/EV_VehicleLevel_Architecture/model_comparison
+            PA_Results/EV_VehicleLevel_Architecture/webview
+            PA_Results/VCU_Software/model_comparison
+            PA_Results/VCU_Software/model_standards_results
+            PA_Results/VCU_Software/webview
+            PA_Results/test_results
+            derived/artifacts.dmr
+
+
+
+
+
