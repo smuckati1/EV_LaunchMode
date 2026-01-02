@@ -3,9 +3,9 @@
 
 ## CI/CD Pipelines: Current Status
 | **(InsideLabs) GitLab CI/CD** <br /><img src="Images/logo_GL.png" width="100"/>| **GitHub Actions** <br /><img src="Images/logo_GHA.png" width="100"/> | **Azure** <br /><img src="Images/logo_ADO.svg" width="100"/>|
-|:---------------------------:|:-----------------:|:-----------------:|
+|:--------------------------------------------------:|:--------------------------------------------------:|:--------------------------------------------------:|
 |Natick Hosted Windows Server <br /><img src="Images/logo_Windows.png" width="50"/>|Microsoft Hosted Linux VMs <br /><img src="Images/logo_VM.png" width="100"/>|Conatiner images hosted in Azure Registry <br /><img src="Images/logo_Container.svg" width="50"/>|
-|[GitLab CI/CD Pipeline](https://insidelabs-git.mathworks.com/AE-Content/demos/ev_launchmode/badges/main/pipeline.svg)|![GitHub Actions Pipeline](https://github.com/smuckati1/EV_LaunchMode/actions/workflows/MBD_pipeline.yml/badge.svg?branch=main)|TBD |
+|![GitLab CI/CD Pipeline](https://insidelabs-git.mathworks.com/AE-Content/demos/ev_launchmode/badges/main/pipeline.svg)|![GitHub Actions Pipeline](https://github.com/smuckati1/EV_LaunchMode/actions/workflows/MBD_pipeline.yml/badge.svg?branch=main)|TBD |
 
 The repository executes CI/CD pipelines on a variety of platforms and infrastructure types, as indicated above. This showcases how MATLAB and Simulink can integrate seamlessly into diverse automation environments across different CI systems. Learn more [here](https://www.mathworks.com/help/matlab/matlab_prog/continuous-integration-with-matlab-on-ci-platforms.html).
 
@@ -53,7 +53,7 @@ Simulink, Stateflow, System Composer, Simulink Test, Embedded Coder, AUTOSAR Blo
 [MATLAB EXPO 2025 - CI for Simulink](https://www.mathworks.com/videos/ci-for-simulink-speed-up-model-based-design-with-automated-pipelines-1762247698554.html)
 
 ## Contact
-Sameer K Muckatira, Jason Ghidella
+Sameer K Muckatira, Jason Ghidella, Winston Yu, Sagar Hukkire
 
 ## Relevant Industries
 * MBD adopter who are looking to use Continuous Integration, and starting on DevOps
