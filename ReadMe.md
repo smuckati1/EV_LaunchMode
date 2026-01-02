@@ -1,6 +1,7 @@
-| **Branch - main** | **Branch - bFeature** |
-|:---------------------------|:-----------------:|
-|[![MBD Pipeline](https://github.com/smuckati1/EV_BatteryManagement_Controllers/actions/workflows/simulink_pipeline_multijob.yml/badge.svg?branch=main)](https://github.com/smuckati1/EV_BatteryManagement_Controllers/actions/workflows/simulink_pipeline_multijob.yml)|[![MBD Pipeline](https://github.com/smuckati1/EV_BatteryManagement_Controllers/actions/workflows/simulink_pipeline_multijob.yml/badge.svg?branch=Feature)](https://github.com/smuckati1/EV_BatteryManagement_Controllers/actions/workflows/simulink_pipeline_multijob.yml)|
+| **GitHub Actions** | **(InsideLabs) GitLab CI/CD** | **Azure**|
+|:---------------------------|:-----------------:|:-----------------:|
+|Microsoft Hosted Linux VMs|Natick Hosted Windows Server|Conatiner images hosted in Azure Registry|
+|[![GitHub Actions Pipeline](https://github.com/smuckati1/EV_LaunchMode/actions/workflows/MBD_pipeline.yml/badge.svg?branch=main)]|![GitLab CI/CD Pipeline](https://insidelabs-git.mathworks.com/AE-Content/demos/ev_launchmode/badges/main/pipeline.svg)| TBD |
 
 # Continuous Integration (CI) for MBD - Automate Model Testing and and Generate AUTOSAR Compliant Code
 
