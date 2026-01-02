@@ -1,0 +1,347 @@
+stages:
+  - Check_Modeling_Standards
+  - Generate_Model_Comparison
+  - Generate_Simulink_Web_View
+  - Run_Tests
+  - Merge_Test_Results
+  - Generate_Code
+  - Zip_Up_Generated_Code_and_Details
+  - Generate_PADV_Report
+
+only:
+  - main
+  - bDevelopment
+
+cache:
+  key:
+    simulink_pipeline_GitLab-ci
+
+  paths:
+    - GeneratedArtifacts/CodeGen
+    - PA_Results/BMS_Software/model_comparison
+    - PA_Results/BMS_Software/model_standards_results
+    - PA_Results/BMS_Software/webview
+    - PA_Results/EV_ControlSystem_Architecture/model_comparison
+    - PA_Results/EV_ControlSystem_Architecture/webview
+    - PA_Results/EV_VehicleLevel_Architecture/model_comparison
+    - PA_Results/EV_VehicleLevel_Architecture/webview
+    - PA_Results/VCU_Software/model_comparison
+    - PA_Results/VCU_Software/model_standards_results
+    - PA_Results/VCU_Software/webview
+    - PA_Results/test_results
+    - derived/artifacts.dmr
+
+  when:
+    always
+
+
+Check_Modeling_Standards:
+  stage:
+    Check_Modeling_Standards
+
+  tags:
+    - on-prem
+
+  script:
+  - >
+    mw -using BR2025bd matlab 
+    -nodesktop 
+    -logfile output.log 
+    -batch "openProject(pwd);
+    runprocess(Tasks = {'padv.builtin.task.RunModelStandards|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx',
+    'padv.builtin.task.RunModelStandards|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, 
+    Process = 'CIPipeline', 
+    Force = false, 
+    ExitInBatchMode = true, 
+    RerunFailedTasks = false, 
+    RerunErroredTasks = false, 
+    GenerateJUnitForProcess = true);" 
+
+  artifacts:
+    paths:
+      - PA_Results/junit/padv_builtin_task_RunModelStandards_BMS_Software_JUnit.xml
+      - PA_Results/junit/padv_builtin_task_RunModelStandards_VCU_Software_JUnit.xml
+
+    reports:
+      junit:
+        - PA_Results/junit/padv_builtin_task_RunModelStandards_BMS_Software_JUnit.xml
+        - PA_Results/junit/padv_builtin_task_RunModelStandards_VCU_Software_JUnit.xml
+
+
+
+
+Generate_Model_Comparison:
+  stage:
+    Generate_Model_Comparison
+
+  tags:
+    - on-prem
+
+  script:
+  - >
+    mw -using BR2025bd matlab 
+    -nodesktop 
+    -logfile output.log 
+    -batch "openProject(pwd);
+    runprocess(Tasks = {'padv.builtin.task.GenerateModelComparison|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx',
+    'padv.builtin.task.GenerateModelComparison|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx',
+    'padv.builtin.task.GenerateModelComparison|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx',
+    'padv.builtin.task.GenerateModelComparison|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, 
+    Process = 'CIPipeline', 
+    Force = false, 
+    ExitInBatchMode = true, 
+    RerunFailedTasks = false, 
+    RerunErroredTasks = false, 
+    GenerateJUnitForProcess = true);" 
+
+  artifacts:
+    paths:
+      - PA_Results/junit/padv_builtin_task_GenerateModelComparison_BMS_Software_JUnit.xml
+      - PA_Results/junit/padv_builtin_task_GenerateModelComparison_EV_ControlSystem_Architecture_JUnit.xml
+      - PA_Results/junit/padv_builtin_task_GenerateModelComparison_EV_VehicleLevel_Architecture_JUnit.xml
+      - PA_Results/junit/padv_builtin_task_GenerateModelComparison_VCU_Software_JUnit.xml
+
+    reports:
+      junit:
+        - PA_Results/junit/padv_builtin_task_GenerateModelComparison_BMS_Software_JUnit.xml
+        - PA_Results/junit/padv_builtin_task_GenerateModelComparison_EV_ControlSystem_Architecture_JUnit.xml
+        - PA_Results/junit/padv_builtin_task_GenerateModelComparison_EV_VehicleLevel_Architecture_JUnit.xml
+        - PA_Results/junit/padv_builtin_task_GenerateModelComparison_VCU_Software_JUnit.xml
+
+
+
+
+Generate_Simulink_Web_View:
+  stage:
+    Generate_Simulink_Web_View
+
+  tags:
+    - on-prem
+
+  script:
+  - >
+    mw -using BR2025bd matlab 
+    -nodesktop 
+    -logfile output.log 
+    -batch "openProject(pwd);
+    runprocess(Tasks = {'padv.builtin.task.GenerateSimulinkWebView|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx',
+    'padv.builtin.task.GenerateSimulinkWebView|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx',
+    'padv.builtin.task.GenerateSimulinkWebView|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx',
+    'padv.builtin.task.GenerateSimulinkWebView|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, 
+    Process = 'CIPipeline', 
+    Force = false, 
+    ExitInBatchMode = true, 
+    RerunFailedTasks = false, 
+    RerunErroredTasks = false, 
+    GenerateJUnitForProcess = true);" 
+
+  artifacts:
+    paths:
+      - PA_Results/junit/padv_builtin_task_GenerateSimulinkWebView_BMS_Software_JUnit.xml
+      - PA_Results/junit/padv_builtin_task_GenerateSimulinkWebView_EV_ControlSystem_Architecture_JUnit.xml
+      - PA_Results/junit/padv_builtin_task_GenerateSimulinkWebView_EV_VehicleLevel_Architecture_JUnit.xml
+      - PA_Results/junit/padv_builtin_task_GenerateSimulinkWebView_VCU_Software_JUnit.xml
+
+    reports:
+      junit:
+        - PA_Results/junit/padv_builtin_task_GenerateSimulinkWebView_BMS_Software_JUnit.xml
+        - PA_Results/junit/padv_builtin_task_GenerateSimulinkWebView_EV_ControlSystem_Architecture_JUnit.xml
+        - PA_Results/junit/padv_builtin_task_GenerateSimulinkWebView_EV_VehicleLevel_Architecture_JUnit.xml
+        - PA_Results/junit/padv_builtin_task_GenerateSimulinkWebView_VCU_Software_JUnit.xml
+
+
+
+
+Run_Tests:
+  stage:
+    Run_Tests
+
+  tags:
+    - on-prem
+
+  script:
+  - >
+    mw -using BR2025bd matlab 
+    -nodesktop 
+    -logfile output.log 
+    -batch "openProject(pwd);
+    runprocess(Tasks = {'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|dff27def-6d54-4ff8-bcaf-6d1fe25a276a',
+    'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|9eeeced6-977a-442c-9d77-df718a53e97f',
+    'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|3ed23bc5-c287-46ee-872e-df5ca44abe30',
+    'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|2ea864db-50a7-43ca-a6f7-0647d3596974',
+    'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|02_BMS_Models/Tests/BMS_Tests.mldatx|0ffa4996-3c2a-4bd7-a907-a79ff7b1d9b5',
+    'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|02_BMS_Models/Tests/BMS_Tests.mldatx|aaed3b09-41f6-47b6-94a1-573856817bf7',
+    'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|02_BMS_Models/Tests/BMS_Tests_SiL.mldatx|ee9e6137-7eb6-48e3-a130-81fa3c4a56fd',
+    'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|03_VCU_Models/Tests/EV2M_VCU_MiLtests.mldatx|95fe9086-5072-4cc8-827c-df4d86199177',
+    'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|03_VCU_Models/Tests/EV2M_VCU_MiLtests.mldatx|d6155623-6ac8-49c4-afb7-2f47a71d59cc'}, 
+    Process = 'CIPipeline', 
+    Force = false, 
+    ExitInBatchMode = true, 
+    RerunFailedTasks = false, 
+    RerunErroredTasks = false, 
+    GenerateJUnitForProcess = true);" 
+
+
+Merge_Test_Results:
+  stage:
+    Merge_Test_Results
+
+  tags:
+    - on-prem
+
+  script:
+  - >
+    mw -using BR2025bd matlab 
+    -nodesktop 
+    -logfile output.log 
+    -batch "openProject(pwd);
+    runprocess(Tasks = {'padv.builtin.task.MergeTestResults|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx',
+    'padv.builtin.task.MergeTestResults|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx',
+    'padv.builtin.task.MergeTestResults|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, 
+    Process = 'CIPipeline', 
+    Force = false, 
+    ExitInBatchMode = true, 
+    RerunFailedTasks = false, 
+    RerunErroredTasks = false, 
+    GenerateJUnitForProcess = true);" 
+
+  artifacts:
+    paths:
+      - PA_Results/junit/padv_builtin_task_MergeTestResults_BMS_Software_JUnit.xml
+      - PA_Results/junit/padv_builtin_task_MergeTestResults_EV_ControlSystem_Architecture_JUnit.xml
+      - PA_Results/junit/padv_builtin_task_MergeTestResults_VCU_Software_JUnit.xml
+
+    reports:
+      junit:
+        - PA_Results/junit/padv_builtin_task_MergeTestResults_BMS_Software_JUnit.xml
+        - PA_Results/junit/padv_builtin_task_MergeTestResults_EV_ControlSystem_Architecture_JUnit.xml
+        - PA_Results/junit/padv_builtin_task_MergeTestResults_VCU_Software_JUnit.xml
+
+
+
+
+Generate_Code:
+  stage:
+    Generate_Code
+
+  tags:
+    - on-prem
+
+  script:
+  - >
+    mw -using BR2025bd matlab 
+    -nodesktop 
+    -logfile output.log 
+    -batch "openProject(pwd);
+    runprocess(Tasks = {'padv.builtin.task.GenerateCode|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx',
+    'padv.builtin.task.GenerateCode|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, 
+    Process = 'CIPipeline', 
+    Force = false, 
+    ExitInBatchMode = true, 
+    RerunFailedTasks = false, 
+    RerunErroredTasks = false, 
+    GenerateJUnitForProcess = true);" 
+
+  artifacts:
+    paths:
+      - PA_Results/junit/padv_builtin_task_GenerateCode_BMS_Software_JUnit.xml
+      - PA_Results/junit/padv_builtin_task_GenerateCode_VCU_Software_JUnit.xml
+
+    reports:
+      junit:
+        - PA_Results/junit/padv_builtin_task_GenerateCode_BMS_Software_JUnit.xml
+        - PA_Results/junit/padv_builtin_task_GenerateCode_VCU_Software_JUnit.xml
+
+
+
+
+Zip_Up_Generated_Code_and_Details:
+  stage:
+    Zip_Up_Generated_Code_and_Details
+
+  tags:
+    - on-prem
+
+  script:
+  - >
+    mw -using BR2025bd matlab 
+    -nodesktop 
+    -logfile output.log 
+    -batch "openProject(pwd);
+    runprocess(Tasks = {'processLibrary.Task.GenCodeandPackIt|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx',
+    'processLibrary.Task.GenCodeandPackIt|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, 
+    Process = 'CIPipeline', 
+    Force = false, 
+    ExitInBatchMode = true, 
+    RerunFailedTasks = false, 
+    RerunErroredTasks = false, 
+    GenerateJUnitForProcess = true);" 
+
+  artifacts:
+    paths:
+      - PA_Results/junit/processLibrary_Task_GenCodeandPackIt_BMS_Software_JUnit.xml
+      - PA_Results/junit/processLibrary_Task_GenCodeandPackIt_VCU_Software_JUnit.xml
+
+    reports:
+      junit:
+        - PA_Results/junit/processLibrary_Task_GenCodeandPackIt_BMS_Software_JUnit.xml
+        - PA_Results/junit/processLibrary_Task_GenCodeandPackIt_VCU_Software_JUnit.xml
+
+
+
+
+Generate_PADV_Report:
+  stage:
+    Generate_PADV_Report
+
+  tags:
+    - on-prem
+
+  script:
+  - >
+    mw -using BR2025bd matlab 
+    -nodesktop 
+    -logfile output.log 
+    -batch "openProject(pwd);
+    rptObj=padv.ProcessAdvisorReportGenerator(Process = 'CIPipeline', Format='pdf', OutputPath=['$', 'PROJECTROOT', '$', '/ProcessAdvisorReport']);
+    rptObj.generateReport();" 
+
+  artifacts:
+    paths:
+      - ProcessAdvisorReport.pdf
+
+    when:
+      always
+
+    expire_in:
+      90 days
+
+
+
+Collect_Artifacts:
+  stage:
+    .post
+
+  tags:
+    - on-prem
+
+  when:
+    always
+
+  script:
+  - >
+    mw -using BR2025bd matlab 
+    -nodesktop 
+    -logfile output.log 
+    -batch "openProject(pwd);
+    zippedFiles = padv.zipBuildArtifacts('CIPipeline',{'GeneratedArtifacts/CodeGen', 'PA_Results/BMS_Software/model_comparison', 'PA_Results/BMS_Software/model_standards_results', 'PA_Results/BMS_Software/webview', 'PA_Results/EV_ControlSystem_Architecture/model_comparison', 'PA_Results/EV_ControlSystem_Architecture/webview', 'PA_Results/EV_VehicleLevel_Architecture/model_comparison', 'PA_Results/EV_VehicleLevel_Architecture/webview', 'PA_Results/VCU_Software/model_comparison', 'PA_Results/VCU_Software/model_standards_results', 'PA_Results/VCU_Software/webview', 'PA_Results/test_results', 'ProcessAdvisorReport.pdf'},'mbd_pipeline_artifacts');" 
+
+  artifacts:
+    paths:
+      - mbd_pipeline_artifacts
+
+    expire_in:
+      90 days
+
+
+
