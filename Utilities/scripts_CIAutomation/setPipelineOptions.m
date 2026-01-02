@@ -1,14 +1,12 @@
-clear
-clc
 matlabVersion = "R2025b";
 
-% GHoptions = setupGitHubOptions(matlabVersion);
-% genPipeline = padv.pipeline.generatePipeline(GHoptions);
-% disp(genPipeline.GeneratedPipelineFiles)
-% 
-% GLoptions = setupGitLabOptions(matlabVersion);
-% genPipeline = padv.pipeline.generatePipeline(GLoptions);
-% disp(genPipeline.GeneratedPipelineFiles)
+GHoptions = setupGitHubOptions(matlabVersion);
+genPipeline = padv.pipeline.generatePipeline(GHoptions);
+disp(genPipeline.GeneratedPipelineFiles)
+
+GLoptions = setupGitLabOptions(matlabVersion);
+genPipeline = padv.pipeline.generatePipeline(GLoptions);
+disp(genPipeline.GeneratedPipelineFiles)
 
 ADOoptions = setupAzureOptions(matlabVersion);
 genPipeline = padv.pipeline.generatePipeline(ADOoptions);
@@ -30,14 +28,8 @@ function options = setupAzureOptions(matlabVersion)
     options.PipelineArchitecture = padv.pipeline.Architecture.SerialStagesGroupPerTask;
     options.EnablePipelineCaching = true;
     
-    pAdvoptions = padv.pipeline.RunProcessOptions();
-    pAdvoptions.DryRun = false;
-    pAdvoptions.EnableTaskLogging = true;
-    pAdvoptions.Force = false;
-    pAdvoptions.RunWithoutSaving = false;
-    pAdvoptions.GenerateJUnitForProcess = true;
-    pAdvoptions.GenerateReport = false;
-    
+    % Use the padv.pipeline.RunProcessOptions object to specify how your generated pipeline files invoke the runprocess function. 
+    pAdvoptions = setRunProcessOptns();
     options.RunprocessCommandOptions = pAdvoptions;
     
     
@@ -72,16 +64,9 @@ function options = setupGitHubOptions(matlabVersion)
     options.PipelineArchitecture = padv.pipeline.Architecture.SerialStagesGroupPerTask;
     options.EnablePipelineCaching = true;
     
-    pAdvoptions = padv.pipeline.RunProcessOptions();
-    pAdvoptions.DryRun = false;
-    pAdvoptions.EnableTaskLogging = true;
-    pAdvoptions.Force = false;
-    pAdvoptions.RunWithoutSaving = false;
-    pAdvoptions.GenerateJUnitForProcess = true;
-    pAdvoptions.GenerateReport = false;
-    
+    % Use the padv.pipeline.RunProcessOptions object to specify how your generated pipeline files invoke the runprocess function. 
+    pAdvoptions = setRunProcessOptns();
     options.RunprocessCommandOptions = pAdvoptions;
-    
     
     options.EnableArtifactCollection = "always";
     options.ArtifactZipFileName = "mbd_pipeline_artifacts";
@@ -112,16 +97,9 @@ function options = setupGitLabOptions(matlabVersion)
     options.PipelineArchitecture = padv.pipeline.Architecture.SerialStagesGroupPerTask;
     options.EnablePipelineCaching = true;
     
-    pAdvoptions = padv.pipeline.RunProcessOptions();
-    pAdvoptions.DryRun = false;
-    pAdvoptions.EnableTaskLogging = true;
-    pAdvoptions.Force = false;
-    pAdvoptions.RunWithoutSaving = false;
-    pAdvoptions.GenerateJUnitForProcess = true;
-    pAdvoptions.GenerateReport = false;
-    
+    % Use the padv.pipeline.RunProcessOptions object to specify how your generated pipeline files invoke the runprocess function. 
+    pAdvoptions = setRunProcessOptns();
     options.RunprocessCommandOptions = pAdvoptions;
-    
     
     options.EnableArtifactCollection = "always";
     options.ArtifactZipFileName = "mbd_pipeline_artifacts";
@@ -134,4 +112,16 @@ function options = setupGitLabOptions(matlabVersion)
     options.EnableOpenTelemetry = false;
     
     options.GeneratedYMLFileName = "simulink_pipeline_GitLab-ci";
+end
+
+function pAdvoptions = setRunProcessOptns()
+pAdvoptions = padv.pipeline.RunProcessOptions();
+pAdvoptions.DryRun = false;
+pAdvoptions.EnableTaskLogging = true;
+pAdvoptions.Force = false;
+pAdvoptions.RunWithoutSaving = false;
+pAdvoptions.RerunErroredTasks = true;
+pAdvoptions.RerunFailedTasks = true;
+pAdvoptions.GenerateJUnitForProcess = true;
+pAdvoptions.GenerateReport = false;
 end

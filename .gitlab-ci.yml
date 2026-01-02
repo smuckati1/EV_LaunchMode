@@ -11,8 +11,15 @@ stages:
 # Limit pipeline to specific branches globally
 workflow:
   rules:
+    # Run for direct commits to these branches
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_COMMIT_BRANCH == "bDevelopment"
+
+    # Run for merge request pipelines when the MR targets main
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" &&
+          $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
+
+    # Block everything else
     - when: never
 
 
@@ -57,14 +64,17 @@ Check_Modeling_Standards:
     Process = 'CIPipeline', 
     Force = false, 
     ExitInBatchMode = true, 
-    RerunFailedTasks = false, 
-    RerunErroredTasks = false, 
+    RerunFailedTasks = true, 
+    RerunErroredTasks = true, 
     GenerateJUnitForProcess = true);" 
 
   artifacts:
     paths:
       - PA_Results/junit/padv_builtin_task_RunModelStandards_BMS_Software_JUnit.xml
       - PA_Results/junit/padv_builtin_task_RunModelStandards_VCU_Software_JUnit.xml
+      - derived/artifacts.dmr
+      - PA_Results/BMS_Software/model_standards_results
+      - PA_Results/VCU_Software/model_standards_results
 
     reports:
       junit:
@@ -94,8 +104,8 @@ Generate_Model_Comparison:
     Process = 'CIPipeline', 
     Force = false, 
     ExitInBatchMode = true, 
-    RerunFailedTasks = false, 
-    RerunErroredTasks = false, 
+    RerunFailedTasks = true, 
+    RerunErroredTasks = true, 
     GenerateJUnitForProcess = true);" 
 
   artifacts:
@@ -104,6 +114,11 @@ Generate_Model_Comparison:
       - PA_Results/junit/padv_builtin_task_GenerateModelComparison_EV_ControlSystem_Architecture_JUnit.xml
       - PA_Results/junit/padv_builtin_task_GenerateModelComparison_EV_VehicleLevel_Architecture_JUnit.xml
       - PA_Results/junit/padv_builtin_task_GenerateModelComparison_VCU_Software_JUnit.xml
+      - derived/artifacts.dmr
+      - PA_Results/BMS_Software/model_comparison
+      - PA_Results/EV_ControlSystem_Architecture/model_comparison
+      - PA_Results/EV_VehicleLevel_Architecture/model_comparison
+      - PA_Results/VCU_Software/model_comparison
 
     reports:
       junit:
@@ -135,8 +150,8 @@ Generate_Simulink_Web_View:
     Process = 'CIPipeline', 
     Force = false, 
     ExitInBatchMode = true, 
-    RerunFailedTasks = false, 
-    RerunErroredTasks = false, 
+    RerunFailedTasks = true, 
+    RerunErroredTasks = true, 
     GenerateJUnitForProcess = true);" 
 
   artifacts:
@@ -145,6 +160,11 @@ Generate_Simulink_Web_View:
       - PA_Results/junit/padv_builtin_task_GenerateSimulinkWebView_EV_ControlSystem_Architecture_JUnit.xml
       - PA_Results/junit/padv_builtin_task_GenerateSimulinkWebView_EV_VehicleLevel_Architecture_JUnit.xml
       - PA_Results/junit/padv_builtin_task_GenerateSimulinkWebView_VCU_Software_JUnit.xml
+      - derived/artifacts.dmr
+      - PA_Results/BMS_Software/webview
+      - PA_Results/EV_ControlSystem_Architecture/webview
+      - PA_Results/EV_VehicleLevel_Architecture/webview
+      - PA_Results/VCU_Software/webview
 
     reports:
       junit:
@@ -181,9 +201,14 @@ Run_Tests:
     Process = 'CIPipeline', 
     Force = false, 
     ExitInBatchMode = true, 
-    RerunFailedTasks = false, 
-    RerunErroredTasks = false, 
+    RerunFailedTasks = true, 
+    RerunErroredTasks = true, 
     GenerateJUnitForProcess = true);" 
+
+  artifacts:
+    paths:
+      - derived/artifacts.dmr
+      - PA_Results/test_results
 
 
 Merge_Test_Results:
@@ -205,8 +230,8 @@ Merge_Test_Results:
     Process = 'CIPipeline', 
     Force = false, 
     ExitInBatchMode = true, 
-    RerunFailedTasks = false, 
-    RerunErroredTasks = false, 
+    RerunFailedTasks = true, 
+    RerunErroredTasks = true, 
     GenerateJUnitForProcess = true);" 
 
   artifacts:
@@ -214,6 +239,8 @@ Merge_Test_Results:
       - PA_Results/junit/padv_builtin_task_MergeTestResults_BMS_Software_JUnit.xml
       - PA_Results/junit/padv_builtin_task_MergeTestResults_EV_ControlSystem_Architecture_JUnit.xml
       - PA_Results/junit/padv_builtin_task_MergeTestResults_VCU_Software_JUnit.xml
+      - derived/artifacts.dmr
+      - PA_Results/test_results
 
     reports:
       junit:
@@ -242,14 +269,16 @@ Generate_Code:
     Process = 'CIPipeline', 
     Force = false, 
     ExitInBatchMode = true, 
-    RerunFailedTasks = false, 
-    RerunErroredTasks = false, 
+    RerunFailedTasks = true, 
+    RerunErroredTasks = true, 
     GenerateJUnitForProcess = true);" 
 
   artifacts:
     paths:
       - PA_Results/junit/padv_builtin_task_GenerateCode_BMS_Software_JUnit.xml
       - PA_Results/junit/padv_builtin_task_GenerateCode_VCU_Software_JUnit.xml
+      - derived/artifacts.dmr
+      - GeneratedArtifacts/CodeGen
 
     reports:
       junit:
@@ -277,14 +306,16 @@ Zip_Up_Generated_Code_and_Details:
     Process = 'CIPipeline', 
     Force = false, 
     ExitInBatchMode = true, 
-    RerunFailedTasks = false, 
-    RerunErroredTasks = false, 
+    RerunFailedTasks = true, 
+    RerunErroredTasks = true, 
     GenerateJUnitForProcess = true);" 
 
   artifacts:
     paths:
       - PA_Results/junit/processLibrary_Task_GenCodeandPackIt_BMS_Software_JUnit.xml
       - PA_Results/junit/processLibrary_Task_GenCodeandPackIt_VCU_Software_JUnit.xml
+      - derived/artifacts.dmr
+      - GeneratedArtifacts/CodeGen
 
     reports:
       junit:
@@ -312,6 +343,8 @@ Generate_PADV_Report:
 
   artifacts:
     paths:
+      - ProcessAdvisorReport.pdf
+      - derived/artifacts.dmr
       - ProcessAdvisorReport.pdf
 
     when:
