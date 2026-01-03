@@ -1,0 +1,1921 @@
+variables:
+  PATH_TO_MATLAB:
+    /opt/matlab/R2025b
+  PATH_TO_Polyspace:
+    /opt/matlab
+
+
+stages:
+  - stage:
+      Check_Modeling_Standards
+
+    dependsOn:
+
+
+    jobs:
+      - job:
+          Check_Modeling_Standards
+
+        pool:
+          'Default'
+
+        timeoutInMinutes:
+          0
+
+        steps:
+          - checkout:
+              self
+
+            displayName:
+              Checkout Repository
+
+          - script:
+              mkdir $(System.DefaultWorkingDirectory)/cache_folder/
+
+            displayName:
+              Create Cache Folder
+
+          - task:
+              Cache@2
+
+            displayName:
+              Restore Cache
+
+            inputs:
+              key:
+                mbd_pipeline_artifacts|$(Build.BuildId)
+
+              restoreKeys:
+                cache
+
+              path:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                GeneratedArtifacts/CodeGen/**
+                PA_Results/BMS_Software/model_comparison/**
+                PA_Results/BMS_Software/model_standards_results/**
+                PA_Results/BMS_Software/webview/**
+                PA_Results/EV_ControlSystem_Architecture/model_comparison/**
+                PA_Results/EV_ControlSystem_Architecture/webview/**
+                PA_Results/EV_VehicleLevel_Architecture/model_comparison/**
+                PA_Results/EV_VehicleLevel_Architecture/webview/**
+                PA_Results/VCU_Software/model_comparison/**
+                PA_Results/VCU_Software/model_standards_results/**
+                PA_Results/VCU_Software/webview/**
+                PA_Results/test_results/**
+                derived/artifacts.dmr
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)
+
+
+          - bash:
+               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+
+            displayName:
+              Setup MATLAB
+
+          - script:
+              >
+              matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.RunModelStandards|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.RunModelStandards|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+
+            displayName:
+              Launch MATLAB
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                derived/artifacts.dmr
+                PA_Results/BMS_Software/model_standards_results/**
+                PA_Results/VCU_Software/model_standards_results/**
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              PublishPipelineArtifact@1
+
+            displayName:
+              Upload Artifacts
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              targetPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+              artifact:
+                Check_Modeling_Standards_mbd_pipeline_artifacts
+
+              publishLocation:
+                pipeline
+
+
+          - task:
+              PublishTestResults@2
+
+            displayName:
+              Publish Test Results
+
+            inputs:
+              testResultsFormat:
+                JUnit
+
+              testResultsFiles:
+                |
+                PA_Results/junit/padv_builtin_task_RunModelStandards_BMS_Software_JUnit.xml
+                PA_Results/junit/padv_builtin_task_RunModelStandards_VCU_Software_JUnit.xml
+
+              searchFolder:
+                $(System.DefaultWorkingDirectory)
+
+
+
+
+  - stage:
+      Generate_Model_Comparison
+
+    dependsOn:
+      Check_Modeling_Standards
+
+    jobs:
+      - job:
+          Generate_Model_Comparison
+
+        pool:
+          'Default'
+
+        timeoutInMinutes:
+          0
+
+        steps:
+          - checkout:
+              self
+
+            displayName:
+              Checkout Repository
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Check_Modeling_Standards_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                GeneratedArtifacts/CodeGen/**
+                PA_Results/BMS_Software/model_comparison/**
+                PA_Results/BMS_Software/model_standards_results/**
+                PA_Results/BMS_Software/webview/**
+                PA_Results/EV_ControlSystem_Architecture/model_comparison/**
+                PA_Results/EV_ControlSystem_Architecture/webview/**
+                PA_Results/EV_VehicleLevel_Architecture/model_comparison/**
+                PA_Results/EV_VehicleLevel_Architecture/webview/**
+                PA_Results/VCU_Software/model_comparison/**
+                PA_Results/VCU_Software/model_standards_results/**
+                PA_Results/VCU_Software/webview/**
+                PA_Results/test_results/**
+                derived/artifacts.dmr
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)
+
+
+          - bash:
+               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+
+            displayName:
+              Setup MATLAB
+
+          - script:
+              >
+              matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateModelComparison|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.GenerateModelComparison|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'padv.builtin.task.GenerateModelComparison|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateModelComparison|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+
+            displayName:
+              Launch MATLAB
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                derived/artifacts.dmr
+                PA_Results/BMS_Software/model_comparison/**
+                PA_Results/EV_ControlSystem_Architecture/model_comparison/**
+                PA_Results/EV_VehicleLevel_Architecture/model_comparison/**
+                PA_Results/VCU_Software/model_comparison/**
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)/temp/
+
+
+          - task:
+              PublishPipelineArtifact@1
+
+            displayName:
+              Upload Artifacts
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              targetPath:
+                $(System.DefaultWorkingDirectory)/temp/
+
+              artifact:
+                Generate_Model_Comparison_mbd_pipeline_artifacts
+
+              publishLocation:
+                pipeline
+
+
+          - task:
+              PublishTestResults@2
+
+            displayName:
+              Publish Test Results
+
+            inputs:
+              testResultsFormat:
+                JUnit
+
+              testResultsFiles:
+                |
+                PA_Results/junit/padv_builtin_task_GenerateModelComparison_BMS_Software_JUnit.xml
+                PA_Results/junit/padv_builtin_task_GenerateModelComparison_EV_ControlSystem_Architecture_JUnit.xml
+                PA_Results/junit/padv_builtin_task_GenerateModelComparison_EV_VehicleLevel_Architecture_JUnit.xml
+                PA_Results/junit/padv_builtin_task_GenerateModelComparison_VCU_Software_JUnit.xml
+
+              searchFolder:
+                $(System.DefaultWorkingDirectory)
+
+
+
+
+  - stage:
+      Generate_Simulink_Web_View
+
+    dependsOn:
+      Generate_Model_Comparison
+
+    jobs:
+      - job:
+          Generate_Simulink_Web_View
+
+        pool:
+          'Default'
+
+        timeoutInMinutes:
+          0
+
+        steps:
+          - checkout:
+              self
+
+            displayName:
+              Checkout Repository
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Check_Modeling_Standards_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Model_Comparison_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                GeneratedArtifacts/CodeGen/**
+                PA_Results/BMS_Software/model_comparison/**
+                PA_Results/BMS_Software/model_standards_results/**
+                PA_Results/BMS_Software/webview/**
+                PA_Results/EV_ControlSystem_Architecture/model_comparison/**
+                PA_Results/EV_ControlSystem_Architecture/webview/**
+                PA_Results/EV_VehicleLevel_Architecture/model_comparison/**
+                PA_Results/EV_VehicleLevel_Architecture/webview/**
+                PA_Results/VCU_Software/model_comparison/**
+                PA_Results/VCU_Software/model_standards_results/**
+                PA_Results/VCU_Software/webview/**
+                PA_Results/test_results/**
+                derived/artifacts.dmr
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)
+
+
+          - bash:
+               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+
+            displayName:
+              Setup MATLAB
+
+          - script:
+              >
+              matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateSimulinkWebView|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.GenerateSimulinkWebView|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'padv.builtin.task.GenerateSimulinkWebView|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateSimulinkWebView|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+
+            displayName:
+              Launch MATLAB
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                derived/artifacts.dmr
+                PA_Results/BMS_Software/webview/**
+                PA_Results/EV_ControlSystem_Architecture/webview/**
+                PA_Results/EV_VehicleLevel_Architecture/webview/**
+                PA_Results/VCU_Software/webview/**
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)/temp/
+
+
+          - task:
+              PublishPipelineArtifact@1
+
+            displayName:
+              Upload Artifacts
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              targetPath:
+                $(System.DefaultWorkingDirectory)/temp/
+
+              artifact:
+                Generate_Simulink_Web_View_mbd_pipeline_artifacts
+
+              publishLocation:
+                pipeline
+
+
+          - task:
+              PublishTestResults@2
+
+            displayName:
+              Publish Test Results
+
+            inputs:
+              testResultsFormat:
+                JUnit
+
+              testResultsFiles:
+                |
+                PA_Results/junit/padv_builtin_task_GenerateSimulinkWebView_BMS_Software_JUnit.xml
+                PA_Results/junit/padv_builtin_task_GenerateSimulinkWebView_EV_ControlSystem_Architecture_JUnit.xml
+                PA_Results/junit/padv_builtin_task_GenerateSimulinkWebView_EV_VehicleLevel_Architecture_JUnit.xml
+                PA_Results/junit/padv_builtin_task_GenerateSimulinkWebView_VCU_Software_JUnit.xml
+
+              searchFolder:
+                $(System.DefaultWorkingDirectory)
+
+
+
+
+  - stage:
+      Run_Tests
+
+    dependsOn:
+      Generate_Simulink_Web_View
+
+    jobs:
+      - job:
+          Run_Tests
+
+        pool:
+          'Default'
+
+        timeoutInMinutes:
+          0
+
+        steps:
+          - checkout:
+              self
+
+            displayName:
+              Checkout Repository
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Check_Modeling_Standards_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Model_Comparison_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Simulink_Web_View_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                GeneratedArtifacts/CodeGen/**
+                PA_Results/BMS_Software/model_comparison/**
+                PA_Results/BMS_Software/model_standards_results/**
+                PA_Results/BMS_Software/webview/**
+                PA_Results/EV_ControlSystem_Architecture/model_comparison/**
+                PA_Results/EV_ControlSystem_Architecture/webview/**
+                PA_Results/EV_VehicleLevel_Architecture/model_comparison/**
+                PA_Results/EV_VehicleLevel_Architecture/webview/**
+                PA_Results/VCU_Software/model_comparison/**
+                PA_Results/VCU_Software/model_standards_results/**
+                PA_Results/VCU_Software/webview/**
+                PA_Results/test_results/**
+                derived/artifacts.dmr
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)
+
+
+          - bash:
+               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+
+            displayName:
+              Setup MATLAB
+
+          - script:
+              >
+              matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|dff27def-6d54-4ff8-bcaf-6d1fe25a276a', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|9eeeced6-977a-442c-9d77-df718a53e97f', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|3ed23bc5-c287-46ee-872e-df5ca44abe30', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|2ea864db-50a7-43ca-a6f7-0647d3596974', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|02_BMS_Models/Tests/BMS_Tests.mldatx|0ffa4996-3c2a-4bd7-a907-a79ff7b1d9b5', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|02_BMS_Models/Tests/BMS_Tests.mldatx|aaed3b09-41f6-47b6-94a1-573856817bf7', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|02_BMS_Models/Tests/BMS_Tests_SiL.mldatx|ee9e6137-7eb6-48e3-a130-81fa3c4a56fd', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|03_VCU_Models/Tests/EV2M_VCU_MiLtests.mldatx|95fe9086-5072-4cc8-827c-df4d86199177', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|03_VCU_Models/Tests/EV2M_VCU_MiLtests.mldatx|d6155623-6ac8-49c4-afb7-2f47a71d59cc'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+
+            displayName:
+              Launch MATLAB
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                derived/artifacts.dmr
+                PA_Results/test_results/**
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)/temp/
+
+
+          - task:
+              PublishPipelineArtifact@1
+
+            displayName:
+              Upload Artifacts
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              targetPath:
+                $(System.DefaultWorkingDirectory)/temp/
+
+              artifact:
+                Run_Tests_mbd_pipeline_artifacts
+
+              publishLocation:
+                pipeline
+
+
+
+
+  - stage:
+      Merge_Test_Results
+
+    dependsOn:
+      Run_Tests
+
+    jobs:
+      - job:
+          Merge_Test_Results
+
+        pool:
+          'Default'
+
+        timeoutInMinutes:
+          0
+
+        steps:
+          - checkout:
+              self
+
+            displayName:
+              Checkout Repository
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Check_Modeling_Standards_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Model_Comparison_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Simulink_Web_View_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Run_Tests_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                GeneratedArtifacts/CodeGen/**
+                PA_Results/BMS_Software/model_comparison/**
+                PA_Results/BMS_Software/model_standards_results/**
+                PA_Results/BMS_Software/webview/**
+                PA_Results/EV_ControlSystem_Architecture/model_comparison/**
+                PA_Results/EV_ControlSystem_Architecture/webview/**
+                PA_Results/EV_VehicleLevel_Architecture/model_comparison/**
+                PA_Results/EV_VehicleLevel_Architecture/webview/**
+                PA_Results/VCU_Software/model_comparison/**
+                PA_Results/VCU_Software/model_standards_results/**
+                PA_Results/VCU_Software/webview/**
+                PA_Results/test_results/**
+                derived/artifacts.dmr
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)
+
+
+          - bash:
+               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+
+            displayName:
+              Setup MATLAB
+
+          - script:
+              >
+              matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.MergeTestResults|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.MergeTestResults|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.MergeTestResults|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+
+            displayName:
+              Launch MATLAB
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                derived/artifacts.dmr
+                PA_Results/test_results/**
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)/temp/
+
+
+          - task:
+              PublishPipelineArtifact@1
+
+            displayName:
+              Upload Artifacts
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              targetPath:
+                $(System.DefaultWorkingDirectory)/temp/
+
+              artifact:
+                Merge_Test_Results_mbd_pipeline_artifacts
+
+              publishLocation:
+                pipeline
+
+
+          - task:
+              PublishTestResults@2
+
+            displayName:
+              Publish Test Results
+
+            inputs:
+              testResultsFormat:
+                JUnit
+
+              testResultsFiles:
+                |
+                PA_Results/junit/padv_builtin_task_MergeTestResults_BMS_Software_JUnit.xml
+                PA_Results/junit/padv_builtin_task_MergeTestResults_EV_ControlSystem_Architecture_JUnit.xml
+                PA_Results/junit/padv_builtin_task_MergeTestResults_VCU_Software_JUnit.xml
+
+              searchFolder:
+                $(System.DefaultWorkingDirectory)
+
+
+
+
+  - stage:
+      Generate_Code
+
+    dependsOn:
+      Merge_Test_Results
+
+    jobs:
+      - job:
+          Generate_Code
+
+        pool:
+          'Default'
+
+        timeoutInMinutes:
+          0
+
+        steps:
+          - checkout:
+              self
+
+            displayName:
+              Checkout Repository
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Check_Modeling_Standards_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Model_Comparison_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Simulink_Web_View_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Run_Tests_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Merge_Test_Results_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                GeneratedArtifacts/CodeGen/**
+                PA_Results/BMS_Software/model_comparison/**
+                PA_Results/BMS_Software/model_standards_results/**
+                PA_Results/BMS_Software/webview/**
+                PA_Results/EV_ControlSystem_Architecture/model_comparison/**
+                PA_Results/EV_ControlSystem_Architecture/webview/**
+                PA_Results/EV_VehicleLevel_Architecture/model_comparison/**
+                PA_Results/EV_VehicleLevel_Architecture/webview/**
+                PA_Results/VCU_Software/model_comparison/**
+                PA_Results/VCU_Software/model_standards_results/**
+                PA_Results/VCU_Software/webview/**
+                PA_Results/test_results/**
+                derived/artifacts.dmr
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)
+
+
+          - bash:
+               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+
+            displayName:
+              Setup MATLAB
+
+          - script:
+              >
+              matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateCode|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateCode|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+
+            displayName:
+              Launch MATLAB
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                derived/artifacts.dmr
+                GeneratedArtifacts/CodeGen/**
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)/temp/
+
+
+          - task:
+              PublishPipelineArtifact@1
+
+            displayName:
+              Upload Artifacts
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              targetPath:
+                $(System.DefaultWorkingDirectory)/temp/
+
+              artifact:
+                Generate_Code_mbd_pipeline_artifacts
+
+              publishLocation:
+                pipeline
+
+
+          - task:
+              PublishTestResults@2
+
+            displayName:
+              Publish Test Results
+
+            inputs:
+              testResultsFormat:
+                JUnit
+
+              testResultsFiles:
+                |
+                PA_Results/junit/padv_builtin_task_GenerateCode_BMS_Software_JUnit.xml
+                PA_Results/junit/padv_builtin_task_GenerateCode_VCU_Software_JUnit.xml
+
+              searchFolder:
+                $(System.DefaultWorkingDirectory)
+
+
+
+
+  - stage:
+      Zip_Up_Generated_Code_and_Details
+
+    dependsOn:
+      Generate_Code
+
+    jobs:
+      - job:
+          Zip_Up_Generated_Code_and_Details
+
+        pool:
+          'Default'
+
+        timeoutInMinutes:
+          0
+
+        steps:
+          - checkout:
+              self
+
+            displayName:
+              Checkout Repository
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Check_Modeling_Standards_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Model_Comparison_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Simulink_Web_View_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Run_Tests_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Merge_Test_Results_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Code_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                GeneratedArtifacts/CodeGen/**
+                PA_Results/BMS_Software/model_comparison/**
+                PA_Results/BMS_Software/model_standards_results/**
+                PA_Results/BMS_Software/webview/**
+                PA_Results/EV_ControlSystem_Architecture/model_comparison/**
+                PA_Results/EV_ControlSystem_Architecture/webview/**
+                PA_Results/EV_VehicleLevel_Architecture/model_comparison/**
+                PA_Results/EV_VehicleLevel_Architecture/webview/**
+                PA_Results/VCU_Software/model_comparison/**
+                PA_Results/VCU_Software/model_standards_results/**
+                PA_Results/VCU_Software/webview/**
+                PA_Results/test_results/**
+                derived/artifacts.dmr
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)
+
+
+          - bash:
+               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+
+            displayName:
+              Setup MATLAB
+
+          - script:
+              >
+              matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);runprocess(Tasks = {'processLibrary.Task.GenCodeandPackIt|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'processLibrary.Task.GenCodeandPackIt|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+
+            displayName:
+              Launch MATLAB
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                derived/artifacts.dmr
+                GeneratedArtifacts/CodeGen/**
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)/temp/
+
+
+          - task:
+              PublishPipelineArtifact@1
+
+            displayName:
+              Upload Artifacts
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              targetPath:
+                $(System.DefaultWorkingDirectory)/temp/
+
+              artifact:
+                Zip_Up_Generated_Code_and_Details_mbd_pipeline_artifacts
+
+              publishLocation:
+                pipeline
+
+
+          - task:
+              PublishTestResults@2
+
+            displayName:
+              Publish Test Results
+
+            inputs:
+              testResultsFormat:
+                JUnit
+
+              testResultsFiles:
+                |
+                PA_Results/junit/processLibrary_Task_GenCodeandPackIt_BMS_Software_JUnit.xml
+                PA_Results/junit/processLibrary_Task_GenCodeandPackIt_VCU_Software_JUnit.xml
+
+              searchFolder:
+                $(System.DefaultWorkingDirectory)
+
+
+
+
+  - stage:
+      Unpack_GenCode_and_Run_Polyspace
+
+    dependsOn:
+      Zip_Up_Generated_Code_and_Details
+
+    jobs:
+      - job:
+          Unpack_GenCode_and_Run_Polyspace
+
+        pool:
+          'Default'
+
+        timeoutInMinutes:
+          0
+
+        steps:
+          - checkout:
+              self
+
+            displayName:
+              Checkout Repository
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Check_Modeling_Standards_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Model_Comparison_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Simulink_Web_View_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Run_Tests_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Merge_Test_Results_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Code_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Zip_Up_Generated_Code_and_Details_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                GeneratedArtifacts/CodeGen/**
+                PA_Results/BMS_Software/model_comparison/**
+                PA_Results/BMS_Software/model_standards_results/**
+                PA_Results/BMS_Software/webview/**
+                PA_Results/EV_ControlSystem_Architecture/model_comparison/**
+                PA_Results/EV_ControlSystem_Architecture/webview/**
+                PA_Results/EV_VehicleLevel_Architecture/model_comparison/**
+                PA_Results/EV_VehicleLevel_Architecture/webview/**
+                PA_Results/VCU_Software/model_comparison/**
+                PA_Results/VCU_Software/model_standards_results/**
+                PA_Results/VCU_Software/webview/**
+                PA_Results/test_results/**
+                derived/artifacts.dmr
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)
+
+
+          - script: |
+              echo "Creating pstmp directory"
+              mkdir -p pstmp
+            displayName: Create temp directory
+
+          - script: |
+              echo "Unzipping VCU_Software.zip"
+              unzip -o GeneratedArtifacts/CodeGen/VCU_Software.zip -d pstmp
+            displayName: "Unzip generated artifacts"
+
+
+          - bash:
+               # Add in Instructions to setup Polyspace environment
+               # echo "##vso[task.prependpath]$(PATH_TO_Polyspace)"
+               # Run command to check for Polyspace license
+
+            displayName:
+              Confirm Polyspace Setup
+
+          - script:
+              >
+              mkdir -p PA_Results/Polyspace_Results
+              polyspace-bug-finder -options-file pstmp/CodeGen/Polyspace/optionsFile.txt -results-dir "PA_Results/Polyspace_Results"
+
+            displayName:
+              Launch Polyspace
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                PA_Results/Polyspace_Results/**
+                
+              targetFolder:
+                $(System.DefaultWorkingDirectory)/temp/
+
+
+          - task:
+              PublishPipelineArtifact@1
+
+            displayName:
+              Upload Artifacts
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              targetPath:
+                $(System.DefaultWorkingDirectory)/temp/
+
+              artifact:
+                Polyspace_BugFinder_Analysis_mbd_pipeline_artifacts
+
+              publishLocation:
+                pipeline
+
+
+
+
+  - stage:
+      Generate_PADV_Report
+
+    dependsOn:
+      Unpack_GenCode_and_Run_Polyspace
+
+    condition:
+      succeededOrFailed()
+
+    jobs:
+      - job:
+          Generate_PADV_Report
+
+        pool:
+          'Default'
+
+        timeoutInMinutes:
+          0
+
+        steps:
+          - checkout:
+              self
+
+            displayName:
+              Checkout Repository
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Check_Modeling_Standards_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Model_Comparison_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Simulink_Web_View_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Run_Tests_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Merge_Test_Results_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Code_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Zip_Up_Generated_Code_and_Details_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Polyspace_BugFinder_Analysis_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                GeneratedArtifacts/CodeGen/**
+                PA_Results/BMS_Software/model_comparison/**
+                PA_Results/BMS_Software/model_standards_results/**
+                PA_Results/BMS_Software/webview/**
+                PA_Results/EV_ControlSystem_Architecture/model_comparison/**
+                PA_Results/EV_ControlSystem_Architecture/webview/**
+                PA_Results/EV_VehicleLevel_Architecture/model_comparison/**
+                PA_Results/EV_VehicleLevel_Architecture/webview/**
+                PA_Results/VCU_Software/model_comparison/**
+                PA_Results/VCU_Software/model_standards_results/**
+                PA_Results/VCU_Software/webview/**
+                PA_Results/test_results/**
+                derived/artifacts.dmr
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)
+
+
+          - bash:
+               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+
+            displayName:
+              Setup MATLAB
+
+            condition:
+              succeededOrFailed()
+
+          - script:
+              >
+              matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);
+              rptObj=padv.ProcessAdvisorReportGenerator(Process = 'CIPipeline', Format='pdf', OutputPath=fullfile(currentProject().RootFolder,'ProcessAdvisorReport'));
+              rptObj.generateReport();" 
+
+            displayName:
+              Generate PADV Report
+
+            condition:
+              succeededOrFailed()
+
+          - task:
+              CopyFiles@2
+
+            displayName:
+              Copying Files
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              sourceFolder:
+                $(System.DefaultWorkingDirectory)
+
+              OverWrite:
+                true
+
+              contents:
+                |
+                derived/artifacts.dmr
+                ProcessAdvisorReport.pdf
+
+              targetFolder:
+                $(System.DefaultWorkingDirectory)/temp/
+
+
+          - task:
+              PublishPipelineArtifact@1
+
+            displayName:
+              Upload Artifacts
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              targetPath:
+                $(System.DefaultWorkingDirectory)/temp/
+
+              artifact:
+                Generate_PADV_Report_mbd_pipeline_artifacts
+
+              publishLocation:
+                pipeline
+
+
+
+
+  - stage:
+      Collect_Artifacts
+
+    dependsOn:
+      Generate_PADV_Report
+
+    condition:
+      succeededOrFailed()
+
+    jobs:
+      - job:
+          Collect_Artifacts
+
+        pool:
+          'Default'
+
+        timeoutInMinutes:
+          0
+
+        steps:
+          - checkout:
+              self
+
+            displayName:
+              Checkout Repository
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Check_Modeling_Standards_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Model_Comparison_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Simulink_Web_View_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Run_Tests_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Merge_Test_Results_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_Code_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Zip_Up_Generated_Code_and_Details_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Polyspace_BugFinder_Analysis_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              DownloadPipelineArtifact@2
+
+            displayName:
+              Download Artifacts
+
+            inputs:
+              artifact:
+                Generate_PADV_Report_mbd_pipeline_artifacts
+
+              downloadPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+          - task:
+              PublishPipelineArtifact@1
+
+            displayName:
+              Upload Artifacts
+
+            condition:
+              succeededOrFailed()
+
+            inputs:
+              targetPath:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+              artifact:
+                Collect_Artifacts_mbd_pipeline_artifacts
+
+              publishLocation:
+                pipeline
+
+
+          - task:
+              Cache@2
+
+            displayName:
+              Save Cache
+
+            inputs:
+              key:
+                cache|$(Build.BuildId)
+
+              path:
+                $(System.DefaultWorkingDirectory)/cache_folder/
+
+
+
+
+

@@ -24,7 +24,6 @@ function processmodel(pm)
     includeProveCodeQuality = false && (~isempty(ver('pscodeprover')) || ~isempty(ver('pscodeproverserver')));
     includeCodeInspection = false;
     includeGenerateRequirementsReport = false;
-    runBuildtoolSteps = false;
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% Define Shared Path Variables
@@ -173,22 +172,6 @@ function processmodel(pm)
     end
 
 
-
-    %% Unzip Pack-N-Go and run Polyspace using packaged options (via MATLAB Build Tool)
-    % Runs after code generation
-    if includeGenerateCodeTask && runBuildtoolSteps
-        polyspaceBTTask = pm.addTask( ...
-            padv.builtin.task.RunBuildTool( ...
-                Name="UnzipAndAnalyzePolyspace", ...
-                Title="Unzip Pack-N-Go and Run Polyspace (options-file)", ...
-                IterationQuery=findCodeGenModels, ...
-                Tasks="polyspacePackNGoAnalyze", ...   % target defined in buildfile.m
-                CleanTask="" ...                       % optional clean target in buildfile.m
-            ) ...
-        );
-    end
-
-
     %% Check coding standards
     % Tools required: Polyspace Bug Finder
     if includeGenerateCodeTask && includeAnalyzeModelCode
@@ -275,10 +258,6 @@ function processmodel(pm)
     end
     if includeSDDTask && includeModelStandardsTask
         sddTask.runsAfter(maTask);
-    end
-    if includeGenerateCodeTask && runBuildtoolSteps
-        % Enforce run order: right after codegenTask
-        polyspaceBTTask.runsAfter(psZipUpCodeTask);
     end
     if includeGenerateCodeTask && includeAnalyzeModelCode && includeProveCodeQuality
         pscpTask.runsAfter(psbfTask);
