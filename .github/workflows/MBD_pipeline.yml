@@ -799,7 +799,12 @@ jobs:
          Xvfb :99 &
          export DISPLAY=:99
          echo "DISPLAY=:99" >> $GITHUB_ENV
-
+      
+      - name: Disk usage before Generate Code
+        run: |
+          df -h
+          du -h -d1 .
+      
       - name:
           Run Process Advisor via MATLAB
 
@@ -812,6 +817,12 @@ jobs:
         uses: matlab-actions/run-command@v2
         with:
           command: openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateCode|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateCode|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);
+
+      - name: Disk usage after Generate Code
+        if: always()
+        run: |
+          df -h
+          du -h -d1 .
 
       - name:
           Upload Artifacts
