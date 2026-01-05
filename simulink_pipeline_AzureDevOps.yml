@@ -1,9 +1,24 @@
-variables:
-  PATH_TO_MATLAB:
-    /opt/matlab/R2025b
-  PATH_TO_Polyspace:
-    /opt/matlab
+# Manually edit the file to add the register information
+# Only allow manual run at now
+trigger: none
+# - main
 
+resources:
+- repo: self
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: '09d791ca-d08c-4d4e-badc-1ad1a92cb7aa'
+  imageRepositoryMATLAB: 'matlab'
+  imageRepositoryMATLABPolyspace: 'matlab-polyspace'
+  imageRepositoryPolyspace: 'polyspace'
+  containerRegistry: 'sko2026.azurecr.io'
+  dockerfilePathMATLAB: '$(Build.SourcesDirectory)/matlab_MBD/Dockerfile'
+  dockerfilePathMATLABPolyspace: '$(Build.SourcesDirectory)/matlab_polyspace-server/Dockerfile'
+  dockerfilePathPolyspace: '$(Build.SourcesDirectory)/polyspace-server/Dockerfile'
+  MATLAB_RELEASE: 'R2025b'
+  licenseServer: 27000@@sko2026license.mathworks-workshop.com
+  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
 
 stages:
   - stage:
@@ -17,7 +32,11 @@ stages:
           Check_Modeling_Standards
 
         pool:
-          'Default'
+          vmImage: 'ubuntu-latest'
+
+        container:
+          image: $(containerRegistry)/$(imageRepositoryMATLAB):$(MATLAB_RELEASE)  
+          endpoint: sko2026
 
         timeoutInMinutes:
           0
@@ -176,7 +195,11 @@ stages:
           Generate_Model_Comparison
 
         pool:
-          'Default'
+          vmImage: 'ubuntu-latest'
+
+        container:
+          image: $(containerRegistry)/$(imageRepositoryMATLAB):$(MATLAB_RELEASE)  
+          endpoint: sko2026
 
         timeoutInMinutes:
           0
@@ -330,7 +353,11 @@ stages:
           Generate_Simulink_Web_View
 
         pool:
-          'Default'
+          vmImage: 'ubuntu-latest'
+
+        container:
+          image: $(containerRegistry)/$(imageRepositoryMATLAB):$(MATLAB_RELEASE)  
+          endpoint: sko2026
 
         timeoutInMinutes:
           0
@@ -498,8 +525,12 @@ stages:
           Run_Tests
 
         pool:
-          'Default'
+          vmImage: 'ubuntu-latest'
 
+        container:
+          image: $(containerRegistry)/$(imageRepositoryMATLAB):$(MATLAB_RELEASE)  
+          endpoint: sko2026
+          
         timeoutInMinutes:
           0
 
@@ -656,8 +687,12 @@ stages:
           Merge_Test_Results
 
         pool:
-          'Default'
+          vmImage: 'ubuntu-latest'
 
+        container:
+          image: $(containerRegistry)/$(imageRepositoryMATLAB):$(MATLAB_RELEASE)  
+          endpoint: sko2026
+          
         timeoutInMinutes:
           0
 
@@ -848,8 +883,12 @@ stages:
           Generate_Code
 
         pool:
-          'Default'
+          vmImage: 'ubuntu-latest'
 
+        container:
+          image: $(containerRegistry)/$(imageRepositoryMATLAB):$(MATLAB_RELEASE)  
+          endpoint: sko2026
+          
         timeoutInMinutes:
           0
 
@@ -1053,8 +1092,12 @@ stages:
           Zip_Up_Generated_Code_and_Details
 
         pool:
-          'Default'
+          vmImage: 'ubuntu-latest'
 
+        container:
+          image: $(containerRegistry)/$(imageRepositoryMATLAB):$(MATLAB_RELEASE)  
+          endpoint: sko2026
+          
         timeoutInMinutes:
           0
 
@@ -1272,8 +1315,12 @@ stages:
           Unpack_GenCode_and_Run_Polyspace
 
         pool:
-          'Default'
+          vmImage: 'ubuntu-latest'
 
+        container:
+          image: $(containerRegistry)/$(imageRepositoryPolyspace):$(MATLAB_RELEASE)  
+          endpoint: sko2026
+          
         timeoutInMinutes:
           0
 
@@ -1502,7 +1549,11 @@ stages:
           Generate_PADV_Report
 
         pool:
-          'Default'
+          vmImage: 'ubuntu-latest'
+
+        container:
+          image: $(containerRegistry)/$(imageRepositoryMATLAB):$(MATLAB_RELEASE)  
+          endpoint: sko2026
 
         timeoutInMinutes:
           0
@@ -1744,7 +1795,11 @@ stages:
           Collect_Artifacts
 
         pool:
-          'Default'
+          vmImage: 'ubuntu-latest'
+
+        container:
+          image: $(containerRegistry)/$(imageRepositoryMATLAB):$(MATLAB_RELEASE)  
+          endpoint: sko2026
 
         timeoutInMinutes:
           0
