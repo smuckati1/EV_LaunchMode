@@ -115,6 +115,8 @@ stages:
           - script:
               >
               matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.RunModelStandards|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.RunModelStandards|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+            env:
+              MLM_LICENSE_TOKEN: $(MLM_LICENSE_TOKEN)
 
             displayName:
               Launch MATLAB
@@ -269,6 +271,8 @@ stages:
           - script:
               >
               matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateModelComparison|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.GenerateModelComparison|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'padv.builtin.task.GenerateModelComparison|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateModelComparison|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+            env:
+              MLM_LICENSE_TOKEN: $(MLM_LICENSE_TOKEN)
 
             displayName:
               Launch MATLAB
@@ -441,6 +445,8 @@ stages:
           - script:
               >
               matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateSimulinkWebView|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.GenerateSimulinkWebView|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'padv.builtin.task.GenerateSimulinkWebView|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateSimulinkWebView|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+            env:
+              MLM_LICENSE_TOKEN: $(MLM_LICENSE_TOKEN)
 
             displayName:
               Launch MATLAB
@@ -627,6 +633,8 @@ stages:
           - script:
               >
               matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|dff27def-6d54-4ff8-bcaf-6d1fe25a276a', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|9eeeced6-977a-442c-9d77-df718a53e97f', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|3ed23bc5-c287-46ee-872e-df5ca44abe30', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|01_System_Model/Tests/EV_SysLevel_MiL.mldatx|2ea864db-50a7-43ca-a6f7-0647d3596974', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|02_BMS_Models/Tests/BMS_Tests.mldatx|0ffa4996-3c2a-4bd7-a907-a79ff7b1d9b5', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|02_BMS_Models/Tests/BMS_Tests.mldatx|aaed3b09-41f6-47b6-94a1-573856817bf7', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|02_BMS_Models/Tests/BMS_Tests_SiL.mldatx|ee9e6137-7eb6-48e3-a130-81fa3c4a56fd', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|03_VCU_Models/Tests/EV2M_VCU_MiLtests.mldatx|95fe9086-5072-4cc8-827c-df4d86199177', 'padv.builtin.task.RunTestsPerTestCase|sl_test_case|EV_2Motor_Controllers|03_VCU_Models/Tests/EV2M_VCU_MiLtests.mldatx|d6155623-6ac8-49c4-afb7-2f47a71d59cc'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+            env:
+              MLM_LICENSE_TOKEN: $(MLM_LICENSE_TOKEN)
 
             displayName:
               Launch MATLAB
@@ -803,6 +811,8 @@ stages:
           - script:
               >
               matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.MergeTestResults|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.MergeTestResults|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.MergeTestResults|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+            env:
+              MLM_LICENSE_TOKEN: $(MLM_LICENSE_TOKEN)
 
             displayName:
               Launch MATLAB
@@ -1013,6 +1023,8 @@ stages:
           - script:
               >
               matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateCode|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateCode|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+            env:
+              MLM_LICENSE_TOKEN: $(MLM_LICENSE_TOKEN)
 
             displayName:
               Launch MATLAB
@@ -1236,6 +1248,8 @@ stages:
           - script:
               >
               matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);runprocess(Tasks = {'processLibrary.Task.GenCodeandPackIt|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'processLibrary.Task.GenCodeandPackIt|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+            env:
+              MLM_LICENSE_TOKEN: $(MLM_LICENSE_TOKEN)
 
             displayName:
               Launch MATLAB
@@ -1729,7 +1743,9 @@ stages:
               matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);
               rptObj=padv.ProcessAdvisorReportGenerator(Process = 'CIPipeline', Format='pdf', OutputPath=fullfile(currentProject().RootFolder,'ProcessAdvisorReport'));
               rptObj.generateReport();" 
-
+            env:
+              MLM_LICENSE_TOKEN: $(MLM_LICENSE_TOKEN)
+              
             displayName:
               Generate PADV Report
 
