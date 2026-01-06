@@ -19,6 +19,8 @@ variables:
   MATLAB_RELEASE: 'R2025b'
   licenseServer: 27000@@sko2026license.mathworks-workshop.com
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  PATH_TO_MATLAB: '/opt/matlab/$(MATLAB_RELEASE)'
+  PATH_TO_Polyspace: '/opt/matlab/polyspace'
 
 stages:
   - stage:
