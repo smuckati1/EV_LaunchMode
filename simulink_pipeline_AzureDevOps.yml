@@ -526,7 +526,7 @@ stages:
       Run_Tests
 
     dependsOn:
-      Generate_Simulink_Web_View
+      Generate_Model_Comparison
 
     jobs:
       - job:
