@@ -444,7 +444,7 @@ stages:
 
           - script:
               >
-              matlab-batch  -nodesktop  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateSimulinkWebView|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.GenerateSimulinkWebView|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'padv.builtin.task.GenerateSimulinkWebView|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateSimulinkWebView|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+              matlab-batch -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateSimulinkWebView|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.GenerateSimulinkWebView|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'padv.builtin.task.GenerateSimulinkWebView|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateSimulinkWebView|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
             env:
               MLM_LICENSE_TOKEN: $(MLM_LICENSE_TOKEN)
 
@@ -526,7 +526,7 @@ stages:
       Run_Tests
 
     dependsOn:
-      Generate_Model_Comparison
+      Generate_Simulink_Web_View
 
     jobs:
       - job:
