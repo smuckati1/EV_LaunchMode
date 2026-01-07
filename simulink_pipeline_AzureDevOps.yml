@@ -1506,7 +1506,7 @@ stages:
 
           - script:
               >
-              mkdir -p PA_Results/Polyspace_Results
+              mkdir -p PA_Results/Polyspace_Results;
               polyspace-bug-finder -options-file pstmp/CodeGen/Polyspace/optionsFile.txt -results-dir "PA_Results/Polyspace_Results"
 
             displayName:
