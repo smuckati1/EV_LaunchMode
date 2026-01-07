@@ -107,10 +107,10 @@ stages:
 
 
           - bash:
-               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+               "Xvfb :99 &"
 
             displayName:
-              Setup MATLAB
+              Setup MATLAB Display
 
           - script:
               >
@@ -264,10 +264,10 @@ stages:
 
 
           - bash:
-               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+               "Xvfb :99 &"
 
             displayName:
-              Setup MATLAB
+              Setup MATLAB Display
 
           - script:
               >
@@ -442,7 +442,7 @@ stages:
                "Xvfb :99 &"
 
             displayName:
-              Setup MATLAB and DISPLAY
+              Setup MATLAB DISPLAY
 
           - script:
               >
@@ -628,10 +628,10 @@ stages:
 
 
           - bash:
-               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+               "Xvfb :99 &"
 
             displayName:
-              Setup MATLAB
+              Setup MATLAB Display
 
           - script:
               >
@@ -807,10 +807,10 @@ stages:
 
 
           - bash:
-               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+               "Xvfb :99 &"
 
             displayName:
-              Setup MATLAB
+              Setup MATLAB Display
 
           - script:
               >
@@ -1020,10 +1020,10 @@ stages:
 
 
           - bash:
-               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+               "Xvfb :99 &"
 
             displayName:
-              Setup MATLAB
+              Setup MATLAB Display
 
           - script:
               >
@@ -1246,10 +1246,10 @@ stages:
 
 
           - bash:
-               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+               "Xvfb :99 &"
 
             displayName:
-              Setup MATLAB
+              Setup MATLAB Display
 
           - script:
               >
@@ -1737,10 +1737,10 @@ stages:
 
 
           - bash:
-               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+               "Xvfb :99 &"
 
             displayName:
-              Setup MATLAB
+              Setup MATLAB Display
 
             condition:
               succeededOrFailed()
