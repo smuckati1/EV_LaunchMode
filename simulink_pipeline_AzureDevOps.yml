@@ -439,10 +439,10 @@ stages:
 
 
           - bash:
-               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"
+               echo "##vso[task.prependpath]$(PATH_TO_MATLAB)"; Xvfb :99 &
 
             displayName:
-              Setup MATLAB
+              Setup MATLAB and DISPLAY
 
           - script:
               >
