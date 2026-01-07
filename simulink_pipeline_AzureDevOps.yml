@@ -1497,6 +1497,7 @@ stages:
 
 
           - bash:
+              pwd;ls -l pstmp
                # Add in Instructions to setup Polyspace environment
                # echo "##vso[task.prependpath]$(PATH_TO_Polyspace)"
                # Run command to check for Polyspace license
@@ -1507,7 +1508,7 @@ stages:
           - script:
               >
               mkdir -p PA_Results/Polyspace_Results;
-              polyspace-bug-finder-server -options-file pstmp/CodeGen/Polyspace/optionsFile.txt -results-dir "PA_Results/Polyspace_Results"
+               pstmp/CodeGen/polyspace/optionsFile.txtpolyspace-bug-finder-server -options-file pstmp/CodeGen/Polyspace/optionsFile.txt -results-dir "PA_Results/Polyspace_Results"
 
             displayName:
               Launch Polyspace
