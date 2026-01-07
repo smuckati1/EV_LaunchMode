@@ -1484,15 +1484,15 @@ stages:
               targetFolder:
                 $(System.DefaultWorkingDirectory)
 
-
-          - script: |
-              echo "Creating pstmp directory"
-              mkdir -p pstmp
-            displayName: Create temp directory
+          # Don't need to generate pstmp folder
+          #- script: |
+          #    echo "Creating pstmp directory"
+          #    mkdir -p pstmp
+          #  displayName: Create temp directory
 
           - script: |
               echo "Unzipping VCU_Software.zip"
-              unzip -o GeneratedArtifacts/CodeGen/VCU_Software.zip -d pstmp
+              unzip -o GeneratedArtifacts/CodeGen/VCU_Software.zip -d .
             displayName: "Unzip generated artifacts"
 
 
@@ -1503,7 +1503,7 @@ stages:
                # Run command to check for Polyspace license
 
             displayName:
-              Confirm Polyspace Setup
+              Confirm Polyspace Setup and display the folder
 
           - script:
               >
