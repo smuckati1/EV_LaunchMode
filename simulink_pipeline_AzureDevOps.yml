@@ -1507,9 +1507,9 @@ stages:
 
           - script:
               >
-              cd pstmp/CodeGen/polyspace;
               mkdir -p PA_Results/Polyspace_Results;
-              polyspace-bug-finder-server -options-file optionsFile.txt -results-dir "PA_Results/Polyspace_Results"
+              cd pstmp/CodeGen/polyspace;
+              polyspace-bug-finder-server -options-file optionsFile.txt -results-dir "../../../PA_Results/Polyspace_Results"
 
             displayName:
               Launch Polyspace
