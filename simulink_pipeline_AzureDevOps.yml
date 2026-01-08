@@ -1492,12 +1492,12 @@ stages:
 
           - script: |
               echo "Unzipping VCU_Software.zip"
-              unzip -o GeneratedArtifacts/CodeGen/VCU_Software.zip -d .
+              unzip -o GeneratedArtifacts/CodeGen/VCU_Software.zip -d pstmp
             displayName: "Unzip generated artifacts"
 
 
           - bash:
-              pwd;ls -l pstmp
+              pwd;ls -l .;ls -l *
                # Add in Instructions to setup Polyspace environment
                # echo "##vso[task.prependpath]$(PATH_TO_Polyspace)"
                # Run command to check for Polyspace license
