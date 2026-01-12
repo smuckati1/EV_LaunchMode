@@ -136,10 +136,8 @@ jobs:
         uses: matlab-actions/setup-matlab@v2
         with:
           products: >
-            Parallel_Computing_Toolbox
             Simulink
             Stateflow
-            MATLAB_Test
             Simulink_Test
             Simulink_Coverage
             Simulink_Check
@@ -150,12 +148,14 @@ jobs:
             Simscape
             Simscape_Electrical
             Simscape_Battery
-            MATLAB_Compiler
-            Simulink_Compiler
             Simulink_Report_Generator
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+#            Parallel_Computing_Toolbox
+#            MATLAB_Compiler
+#            Simulink_Compiler
+#            MATLAB_Test
           cache: true
           release: R2025b  
 
@@ -255,10 +255,8 @@ jobs:
         uses: matlab-actions/setup-matlab@v2
         with:
           products: >
-            Parallel_Computing_Toolbox
             Simulink
             Stateflow
-            MATLAB_Test
             Simulink_Test
             Simulink_Coverage
             Simulink_Check
@@ -269,12 +267,14 @@ jobs:
             Simscape
             Simscape_Electrical
             Simscape_Battery
-            MATLAB_Compiler
-            Simulink_Compiler
             Simulink_Report_Generator
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+#            Parallel_Computing_Toolbox
+#            MATLAB_Compiler
+#            Simulink_Compiler
+#            MATLAB_Test
           cache: true
           release: R2025b  
 
@@ -376,10 +376,8 @@ jobs:
         uses: matlab-actions/setup-matlab@v2
         with:
           products: >
-            Parallel_Computing_Toolbox
             Simulink
             Stateflow
-            MATLAB_Test
             Simulink_Test
             Simulink_Coverage
             Simulink_Check
@@ -390,12 +388,14 @@ jobs:
             Simscape
             Simscape_Electrical
             Simscape_Battery
-            MATLAB_Compiler
-            Simulink_Compiler
             Simulink_Report_Generator
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+#            Parallel_Computing_Toolbox
+#            MATLAB_Compiler
+#            Simulink_Compiler
+#            MATLAB_Test
           cache: true
           release: R2025b  
 
@@ -497,10 +497,8 @@ jobs:
         uses: matlab-actions/setup-matlab@v2
         with:
           products: >
-            Parallel_Computing_Toolbox
             Simulink
             Stateflow
-            MATLAB_Test
             Simulink_Test
             Simulink_Coverage
             Simulink_Check
@@ -511,12 +509,14 @@ jobs:
             Simscape
             Simscape_Electrical
             Simscape_Battery
-            MATLAB_Compiler
-            Simulink_Compiler
             Simulink_Report_Generator
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+#            Parallel_Computing_Toolbox
+#            MATLAB_Compiler
+#            Simulink_Compiler
+#            MATLAB_Test
           cache: true
           release: R2025b  
 
@@ -626,10 +626,8 @@ jobs:
         uses: matlab-actions/setup-matlab@v2
         with:
           products: >
-            Parallel_Computing_Toolbox
             Simulink
             Stateflow
-            MATLAB_Test
             Simulink_Test
             Simulink_Coverage
             Simulink_Check
@@ -640,12 +638,14 @@ jobs:
             Simscape
             Simscape_Electrical
             Simscape_Battery
-            MATLAB_Compiler
-            Simulink_Compiler
             Simulink_Report_Generator
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+#            Parallel_Computing_Toolbox
+#            MATLAB_Compiler
+#            Simulink_Compiler
+#            MATLAB_Test
           cache: true
           release: R2025b  
 
@@ -768,10 +768,8 @@ jobs:
         uses: matlab-actions/setup-matlab@v2
         with:
           products: >
-            Parallel_Computing_Toolbox
             Simulink
             Stateflow
-            MATLAB_Test
             Simulink_Test
             Simulink_Coverage
             Simulink_Check
@@ -782,12 +780,14 @@ jobs:
             Simscape
             Simscape_Electrical
             Simscape_Battery
-            MATLAB_Compiler
-            Simulink_Compiler
             Simulink_Report_Generator
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+#            Parallel_Computing_Toolbox
+#            MATLAB_Compiler
+#            Simulink_Compiler
+#            MATLAB_Test
           cache: true
           release: R2025b  
 
@@ -933,10 +933,8 @@ jobs:
         uses: matlab-actions/setup-matlab@v2
         with:
           products: >
-            Parallel_Computing_Toolbox
             Simulink
             Stateflow
-            MATLAB_Test
             Simulink_Test
             Simulink_Coverage
             Simulink_Check
@@ -947,12 +945,14 @@ jobs:
             Simscape
             Simscape_Electrical
             Simscape_Battery
-            MATLAB_Compiler
-            Simulink_Compiler
             Simulink_Report_Generator
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+#            Parallel_Computing_Toolbox
+#            MATLAB_Compiler
+#            Simulink_Compiler
+#            MATLAB_Test
           cache: true
           release: R2025b  
 
@@ -1125,10 +1125,8 @@ jobs:
         uses: matlab-actions/setup-matlab@v2
         with:
           products: >
-            Parallel_Computing_Toolbox
             Simulink
             Stateflow
-            MATLAB_Test
             Simulink_Test
             Simulink_Coverage
             Simulink_Check
@@ -1139,12 +1137,14 @@ jobs:
             Simscape
             Simscape_Electrical
             Simscape_Battery
-            MATLAB_Compiler
-            Simulink_Compiler
             Simulink_Report_Generator
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+#            Parallel_Computing_Toolbox
+#            MATLAB_Compiler
+#            Simulink_Compiler
+#            MATLAB_Test
           cache: true
           release: R2025b  
 
