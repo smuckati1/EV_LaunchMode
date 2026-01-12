@@ -8,6 +8,9 @@ on:
     branches: 
       - main
       - bDevelopment
+  pull_request:
+    branches:
+      - main
 
 permissions:
   checks:
