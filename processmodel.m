@@ -123,7 +123,8 @@ function processmodel(pm)
 
     %% Generate Model Comparison
     if includeModelComparisonTask
-        mdlCompTask = pm.addTask(padv.builtin.task.GenerateModelComparison(IterationQuery=findModels));
+        % mdlCompTask = pm.addTask(padv.builtin.task.GenerateModelComparison(IterationQuery=findModels));
+        mdlCompTask = pm.addTask(processLibrary.diffRprtTask.GenInteractiveCompareRprt(IterationQuery=findModels));
         mdlCompTask.ReportPath = fullfile( ...
             defaultResultPath,'model_comparison');
     end
