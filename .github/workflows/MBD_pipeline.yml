@@ -155,6 +155,7 @@ jobs:
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+            System_Composer
 #            Parallel_Computing_Toolbox
 #            MATLAB_Compiler
 #            Simulink_Compiler
@@ -274,6 +275,7 @@ jobs:
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+            System_Composer
 #            Parallel_Computing_Toolbox
 #            MATLAB_Compiler
 #            Simulink_Compiler
@@ -297,11 +299,11 @@ jobs:
         #  >
         #  matlab-batch 
         #  -nodesktop 
-        #  -logfile output.log "openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateModelComparison|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.GenerateModelComparison|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'padv.builtin.task.GenerateModelComparison|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateModelComparison|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+        #  -logfile output.log "openProject(pwd);runprocess(Tasks = {'processLibrary.diffRprtTask.GenInteractiveCompareRprt|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'processLibrary.diffRprtTask.GenInteractiveCompareRprt|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'processLibrary.diffRprtTask.GenInteractiveCompareRprt|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'processLibrary.diffRprtTask.GenInteractiveCompareRprt|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
 
         uses: matlab-actions/run-command@v2
         with:
-          command: openProject(pwd);runprocess(Tasks = {'padv.builtin.task.GenerateModelComparison|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'padv.builtin.task.GenerateModelComparison|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'padv.builtin.task.GenerateModelComparison|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'padv.builtin.task.GenerateModelComparison|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);
+          command: openProject(pwd);runprocess(Tasks = {'processLibrary.diffRprtTask.GenInteractiveCompareRprt|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'processLibrary.diffRprtTask.GenInteractiveCompareRprt|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'processLibrary.diffRprtTask.GenInteractiveCompareRprt|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'processLibrary.diffRprtTask.GenInteractiveCompareRprt|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);
 
       - name:
           Upload Artifacts
@@ -395,6 +397,7 @@ jobs:
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+            System_Composer
 #            Parallel_Computing_Toolbox
 #            MATLAB_Compiler
 #            Simulink_Compiler
@@ -516,6 +519,7 @@ jobs:
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+            System_Composer
 #            Parallel_Computing_Toolbox
 #            MATLAB_Compiler
 #            Simulink_Compiler
@@ -645,6 +649,7 @@ jobs:
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+            System_Composer
 #            Parallel_Computing_Toolbox
 #            MATLAB_Compiler
 #            Simulink_Compiler
@@ -787,6 +792,7 @@ jobs:
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+            System_Composer
 #            Parallel_Computing_Toolbox
 #            MATLAB_Compiler
 #            Simulink_Compiler
@@ -952,6 +958,7 @@ jobs:
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+            System_Composer
 #            Parallel_Computing_Toolbox
 #            MATLAB_Compiler
 #            Simulink_Compiler
@@ -1144,6 +1151,7 @@ jobs:
             MATLAB_Report_Generator
             AUTOSAR_Blockset
             Powertrain_Blockset
+            System_Composer
 #            Parallel_Computing_Toolbox
 #            MATLAB_Compiler
 #            Simulink_Compiler
