@@ -47,6 +47,8 @@ stages:
           - checkout:
               self
 
+            fetchDepth: 2 
+
             displayName:
               Checkout Repository
 
@@ -213,6 +215,8 @@ stages:
           - checkout:
               self
 
+            fetchDepth: 2 
+
             displayName:
               Checkout Repository
 
@@ -373,6 +377,8 @@ stages:
         steps:
           - checkout:
               self
+
+            fetchDepth: 2 
 
             displayName:
               Checkout Repository
@@ -549,6 +555,8 @@ stages:
           - checkout:
               self
 
+            fetchDepth: 2 
+
             displayName:
               Checkout Repository
 
@@ -713,6 +721,8 @@ stages:
         steps:
           - checkout:
               self
+
+            fetchDepth: 2 
 
             displayName:
               Checkout Repository
@@ -912,6 +922,8 @@ stages:
         steps:
           - checkout:
               self
+
+            fetchDepth: 2 
 
             displayName:
               Checkout Repository
@@ -1124,6 +1136,8 @@ stages:
         steps:
           - checkout:
               self
+
+            fetchDepth: 2 
 
             displayName:
               Checkout Repository
@@ -1350,6 +1364,8 @@ stages:
         steps:
           - checkout:
               self
+
+            fetchDepth: 2 
 
             displayName:
               Checkout Repository
@@ -1586,6 +1602,8 @@ stages:
         steps:
           - checkout:
               self
+
+            fetchDepth: 2 
 
             displayName:
               Checkout Repository
@@ -1835,6 +1853,8 @@ stages:
         steps:
           - checkout:
               self
+
+            fetchDepth: 2 
 
             displayName:
               Checkout Repository

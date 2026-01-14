@@ -37,6 +37,9 @@ jobs:
         uses:
           actions/checkout@v6.0.1
 
+        with:
+            fetch-depth: 2
+
       - name:
           Restore Cache
 
@@ -121,6 +124,9 @@ jobs:
 
         uses:
           actions/checkout@v6.0.1
+
+        with:
+            fetch-depth: 2
 
       - name:
           Download Artifacts
@@ -229,6 +235,9 @@ jobs:
 
         uses:
           actions/checkout@v6.0.1
+          
+        with:
+            fetch-depth: 2
 
       - name:
           Download Artifacts
@@ -352,6 +361,9 @@ jobs:
         uses:
           actions/checkout@v6.0.1
 
+        with:
+            fetch-depth: 2
+
       - name:
           Download Artifacts
         continue-on-error: true
@@ -473,6 +485,9 @@ jobs:
 
         uses:
           actions/checkout@v6.0.1
+          
+        with:
+            fetch-depth: 2
 
       - name:
           Download Artifacts
@@ -591,6 +606,9 @@ jobs:
 
         uses:
           actions/checkout@v6.0.1
+
+        with:
+            fetch-depth: 2
 
       - name:
           Download Artifacts
@@ -722,6 +740,9 @@ jobs:
 
         uses:
           actions/checkout@v6.0.1
+          
+        with:
+            fetch-depth: 2
 
       - name:
           Download Artifacts
@@ -876,6 +897,9 @@ jobs:
 
         uses:
           actions/checkout@v6.0.1
+
+        with:
+            fetch-depth: 2
 
       - name:
           Download Artifacts
@@ -1033,6 +1057,9 @@ jobs:
 
         uses:
           actions/checkout@v6.0.1
+
+        with:
+            fetch-depth: 2
 
       - name:
           Download Artifacts
