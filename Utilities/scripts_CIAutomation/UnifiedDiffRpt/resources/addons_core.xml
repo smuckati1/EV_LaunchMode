@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addonCore>
+  <label>Unified Simulink Diff Report Toolbox</label>
+  <version>1.2.1</version>
+  <type>Toolbox</type>
+  <identifier>482bcaa3-7e79-4bb5-a457-e51c7caaebe3</identifier>
+  <summary>Create a unified Simulink model diff report with hyperlinks to model Webviews</summary>
+  <createdBy name="Dave Hoadley"/>
+  <image>resources/screenshot.png</image>
+</addonCore>
