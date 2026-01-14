@@ -271,7 +271,7 @@ stages:
 
           - script:
               >
-              matlab-batch -logfile output.log "openProject(pwd);runprocess(Tasks = {'processLibrary.diffRprtTask.GenInteractiveCompareRprt|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'processLibrary.diffRprtTask.GenInteractiveCompareRprt|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'processLibrary.diffRprtTask.GenInteractiveCompareRprt|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'processLibrary.diffRprtTask.GenInteractiveCompareRprt|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
+              matlab-batch -logfile output.log "openProject(pwd);runprocess(Tasks = {'processLibrary.task.GenInteractiveCompareRprt|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_ControlSystem_Architecture.slx', 'processLibrary.task.GenInteractiveCompareRprt|zc_file|EV_2Motor_Controllers|01_System_Model/Architecture_Overview/EV_VehicleLevel_Architecture.slx', 'processLibrary.task.GenInteractiveCompareRprt|sl_model_file|EV_2Motor_Controllers|02_BMS_Models/BMS_Software.slx', 'processLibrary.task.GenInteractiveCompareRprt|sl_model_file|EV_2Motor_Controllers|03_VCU_Models/VCU_Software.slx'}, Process = 'CIPipeline', Force = false, ExitInBatchMode = true, RerunFailedTasks = true, RerunErroredTasks = true, GenerateJUnitForProcess = true);" 
             env:
               MLM_LICENSE_TOKEN: $(MLM_LICENSE_TOKEN)
               DISPLAY: $(DISPLAY)
@@ -339,10 +339,10 @@ stages:
 
               testResultsFiles:
                 |
-                PA_Results/junit/processLibrary_diffRprtTask_GenInteractiveCompareRprt_BMS_Software_JUnit.xml
-                PA_Results/junit/processLibrary_diffRprtTask_GenInteractiveCompareRprt_EV_ControlSystem_Architecture_JUnit.xml
-                PA_Results/junit/processLibrary_diffRprtTask_GenInteractiveCompareRprt_EV_VehicleLevel_Architecture_JUnit.xml
-                PA_Results/junit/processLibrary_diffRprtTask_GenInteractiveCompareRprt_VCU_Software_JUnit.xml
+                PA_Results/junit/processLibrary_task_GenInteractiveCompareRprt_BMS_Software_JUnit.xml
+                PA_Results/junit/processLibrary_task_GenInteractiveCompareRprt_EV_ControlSystem_Architecture_JUnit.xml
+                PA_Results/junit/processLibrary_task_GenInteractiveCompareRprt_EV_VehicleLevel_Architecture_JUnit.xml
+                PA_Results/junit/processLibrary_task_GenInteractiveCompareRprt_VCU_Software_JUnit.xml
 
               searchFolder:
                 $(System.DefaultWorkingDirectory)
