@@ -21,6 +21,9 @@ variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
   PATH_TO_MATLAB: '/opt/matlab/$(MATLAB_RELEASE)'
   PATH_TO_Polyspace: '/opt/matlab/polyspace'
+  blobServiceConnection: '48f723ab-d17e-47cf-9ea5-5db02b39534a'
+  StorageWebLink: 'https://sko2026.z13.web.core.windows.net/'
+  StorageAccountKey: '811YAHDjTww7UEYXfqc8Th1EeXk02bH9pdRPjxPUGtRcm+WIeXtEB4kkZ+gPq0XxsH7SLVdcAnlf+AStRdUbTw=='
 
 stages:
   - stage:
