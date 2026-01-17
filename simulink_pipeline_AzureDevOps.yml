@@ -351,6 +351,19 @@ stages:
               searchFolder:
                 $(System.DefaultWorkingDirectory)
 
+            # Use Azure CLI to upload to Azure Storage Static Website
+          - task: AzureCLI@2
+            displayName: Upload coverage report to Azure Storage Static Website. Please find the report at https://sko2026.z13.web.core.windows.net/mbd/$(Build.BuildId)/coverage.html
+            condition: succeededOrFailed()
+            inputs:
+              azureSubscription: '$(blobServiceConnection)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Uploading code coverage report to Azure Storage Static Website..."
+                az storage blob upload-batch --account-name sko2026 --account-key $(StorageAccountKey) --destination '$web/mbd/$(Build.BuildId)' --source '$(System.DefaultWorkingDirectory)/temp' --overwrite
+
+
 
 
 
