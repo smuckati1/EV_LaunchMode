@@ -83,3 +83,11 @@ Sameer K Muckatira, Jason Ghidella, Winston Yu, Sagar Hukkire
 ## Relevant Industries
 * MBD adopter who are looking to use Continuous Integration, and starting on DevOps
 * Automotive customers doing AUTOSAR compliant code generation looking for MiL and SiL
+
+## Mirror the repo to Gitlab gitlab.mathworks-workshop.com from inside lab
+
+* Please run the command git config --global http.sslbackend schannel at you local powershell
+* Create a remote empty repo at gitlab.mathworks-workshop.com or where you want to mirror to
+* Find the remote repo url like https://gitlab.mathworks-workshop.com/wyu/ev_launchmode.git ( you can find it by using the code button on your remote repo )
+* On the remote repo, find the access token selection from setting for your repo, and create one and save the token
+* At inside lab repo, goto to setting of your repo and select repository, and use Mirroring repositories option, add a new mirror to use https with username/password method, use the access token for your password.
