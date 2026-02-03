@@ -69,7 +69,7 @@ Update the Battery Management System (BMS) to increase the Max Discharge Current
   A single push to InsideLabs GitLab triggers:
   - the InsideLabs GitLab CI/CD pipelines
   - the mirrored [GitHub Actions pipelines](https://github.com/smuckati1/EV_LaunchMode/actions) 
-  - the mirrored [Azure DevOps pipelines](https://dev.azure.com/wyu0218/EV_LaunchMode/_build?definitionId=5) (manually triggered for saving costs now)
+  - the mirrored [Azure DevOps pipelines](https://dev.azure.com/wyu0218/EV_LaunchMode/_build?definitionId=5) (manually triggered for saving costs now), [a example model diff](https://sko2026.z13.web.core.windows.net/mbd/189/Unified_BMS_Software_Model_Comparison.html) (for reference)
 
 ## Relevant Products
 Simulink, Stateflow, System Composer, Simulink Test, Embedded Coder, AUTOSAR Blockset, Simulink Check
